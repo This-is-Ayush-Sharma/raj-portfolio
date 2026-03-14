@@ -8,728 +8,564 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            ink:    '#08090c',
-            deep:   '#0f1014',
-            panel:  '#16171d',
-            rim:    '#1e2028',
-            smoke:  '#6b6d7a',
-            mist:   '#9a9caa',
-            snow:   '#eeeef2',
-            gold:   '#d4a853',
-            gold2:  '#f0c96e',
-            flame:  '#e8572a',
-            flame2: '#ff7a4d',
-          },
-          fontFamily: {
-            serif:  ['Playfair Display','Georgia','serif'],
-            sans:   ['Syne','sans-serif'],
-            mono:   ['JetBrains Mono','monospace'],
-          }
-        }
-      }
+      theme: { extend: {
+        colors: { ink:'#08090c',deep:'#0f1014',panel:'#16171d',smoke:'#6b6d7a',mist:'#9a9caa',snow:'#eeeef2',gold:'#d4a853',gold2:'#f0c96e',flame:'#e8572a',flame2:'#ff7a4d' },
+        fontFamily: { serif:['Playfair Display','Georgia','serif'], sans:['Syne','sans-serif'], mono:['JetBrains Mono','monospace'] }
+      }}
     }
   </script>
-
   <style>
-    :root {
-      --gold:  #d4a853;
-      --flame: #e8572a;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    /* ═══════════════════════════════════════════════════
+       BASE
+    ═══════════════════════════════════════════════════ */
+    :root{--gold:#d4a853;--flame:#e8572a;--panel:#16171d;--deep:#0f1014}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:#08090c;color:#eeeef2;font-family:'Syne',sans-serif;overflow-x:hidden}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#08090c}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+    body::before{content:'';position:fixed;inset:0;z-index:9997;pointer-events:none;opacity:.022;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px}
 
-    body {
-      background: #08090c;
-      color: #eeeef2;
-      font-family: 'Syne', sans-serif;
-      overflow-x: hidden;
-    }
+    /* ═══════════════════════════════════════════════════
+       CURSOR
+    ═══════════════════════════════════════════════════ */
+    *{cursor:none!important}
+    #dot{width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s}
+    #ring{width:32px;height:32px;border:1.5px solid rgba(212,168,83,.45);border-radius:50%;position:fixed;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+    body.ch #dot{width:16px;height:16px;background:var(--flame)}
+    body.ch #ring{width:50px;height:50px;border-color:rgba(232,87,42,.5)}
 
-    /* ═══ SCROLLBAR ═══════════════════════════════ */
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: #08090c; }
-    ::-webkit-scrollbar-thumb { background: var(--gold); }
+    /* ═══════════════════════════════════════════════════
+       TYPOGRAPHY UTILITIES
+    ═══════════════════════════════════════════════════ */
+    .lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+    .grad{background:linear-gradient(100deg,var(--gold),#f0c96e 50%,#ff7a4d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .stat-val{font-family:'Playfair Display',serif;font-weight:900}
 
-    /* ═══ NOISE TEXTURE OVERLAY ═══════════════════ */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 9999;
-      pointer-events: none;
-      opacity: .025;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-      background-size: 200px;
-    }
+    /* ═══════════════════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════════════════ */
+    #nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 2.5rem;border-bottom:1px solid transparent;transition:background .4s,border-color .4s}
+    #nav.scrolled{background:rgba(8,9,12,.93);backdrop-filter:blur(20px);border-color:rgba(212,168,83,.1)}
+    .nl{position:relative;color:#6b6d7a;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:color .25s;padding:.25rem 0;text-decoration:none}
+    .nl::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:right;transition:transform .3s}
+    .nl:hover{color:#eeeef2}.nl:hover::after{transform:scaleX(1);transform-origin:left}
 
-    /* ═══ CUSTOM CURSOR ════════════════════════════ */
-    * { cursor: none !important; }
-    #dot  { width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s; }
-    #ring { width:32px;height:32px;border:1.5px solid rgba(212,168,83,.5);border-radius:50%;position:fixed;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .2s,height .2s; }
-    body.cursor-hover #dot  { width:16px;height:16px;background:var(--flame); }
-    body.cursor-hover #ring { width:50px;height:50px; }
+    /* ═══════════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════════ */
+    .btn-g{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--gold),#f0c96e);color:#08090c;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;padding:.9rem 2rem;border-radius:4px;border:none;text-decoration:none;transition:transform .2s,box-shadow .2s,filter .2s}
+    .btn-g:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(212,168,83,.35);filter:brightness(1.08)}
+    .btn-o{display:inline-flex;align-items:center;gap:.6rem;background:transparent;color:#eeeef2;font-family:'Syne',sans-serif;font-weight:600;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;padding:.85rem 2rem;border-radius:4px;border:1px solid rgba(238,238,242,.15);text-decoration:none;transition:border-color .25s,background .25s,transform .2s}
+    .btn-o:hover{border-color:var(--gold);background:rgba(212,168,83,.06);transform:translateY(-2px)}
+    .btn-f{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--flame),#ff7a4d);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;padding:.9rem 2rem;border-radius:4px;border:none;text-decoration:none;transition:transform .2s,box-shadow .2s}
+    .btn-f:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(232,87,42,.35)}
 
-    /* ═══ NAV ══════════════════════════════════════ */
-    #nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      padding: 0 2.5rem;
-      transition: background .4s, border-color .4s, padding .3s;
-      border-bottom: 1px solid transparent;
-    }
-    #nav.scrolled {
-      background: rgba(8,9,12,.92);
-      backdrop-filter: blur(20px);
-      border-color: rgba(212,168,83,.1);
-      padding-top: 0 !important;
-    }
-    .nav-link {
-      position: relative;
-      color: #6b6d7a;
-      font-size: .8rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      transition: color .25s;
-      padding: .25rem 0;
-      text-decoration: none;
-    }
-    .nav-link::after {
-      content: '';
-      position: absolute; bottom: -2px; left: 0; right: 0;
-      height: 1px; background: var(--gold);
-      transform: scaleX(0); transform-origin: right;
-      transition: transform .3s ease;
-    }
-    .nav-link:hover { color: #eeeef2; }
-    .nav-link:hover::after { transform: scaleX(1); transform-origin: left; }
+    /* ═══════════════════════════════════════════════════
+       REVEAL ANIMATIONS
+    ═══════════════════════════════════════════════════ */
+    .rv{opacity:0;transform:translateY(32px);transition:opacity .75s ease,transform .75s ease}
+    .rv-l{opacity:0;transform:translateX(-40px);transition:opacity .75s ease,transform .75s ease}
+    .rv-r{opacity:0;transform:translateX(40px);transition:opacity .75s ease,transform .75s ease}
+    .rv.on,.rv-l.on,.rv-r.on{opacity:1;transform:none}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:translateY(0)}}
+    .hu{opacity:0;animation:fadeUp .9s forwards}
 
-    /* ═══ SECTION LABEL ════════════════════════════ */
-    .label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .68rem;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
+    /* ═══════════════════════════════════════════════════
+       HERO / PHOTO
+    ═══════════════════════════════════════════════════ */
+    .hero-bg{background:radial-gradient(ellipse 90% 70% at 65% 45%,rgba(212,168,83,.08),transparent 60%),radial-gradient(ellipse 60% 50% at 20% 70%,rgba(232,87,42,.05),transparent 55%),#08090c}
+    .photo-wrap{position:relative;width:100%;max-width:420px}
+    .photo-glow{position:absolute;inset:-2px;border-radius:18px;background:linear-gradient(135deg,rgba(212,168,83,.4),rgba(232,87,42,.2),transparent)}
+    .photo-inner{position:relative;z-index:1;border-radius:16px;overflow:hidden;aspect-ratio:3/4}
+    .photo-ph{width:100%;height:100%;background:linear-gradient(160deg,#1e2028,#141418,#0f1014);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem}
+    .exp-b{position:absolute;bottom:-20px;right:-20px;z-index:10;background:linear-gradient(135deg,var(--gold),#f0c96e);color:#08090c;border-radius:12px;padding:1rem 1.4rem;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.6)}
+    .avail-b{position:absolute;top:-16px;left:-16px;z-index:10;background:#0f1014;border:1px solid rgba(212,168,83,.3);border-radius:999px;padding:.5rem 1.1rem;display:flex;align-items:center;gap:.5rem;box-shadow:0 8px 30px rgba(0,0,0,.5);white-space:nowrap}
+    @media(max-width:767px){.exp-b{right:0;bottom:-16px}.avail-b{left:0;top:-16px}}
 
-    /* ═══ GRADIENT TEXT ════════════════════════════ */
-    .gold-grad {
-      background: linear-gradient(100deg, var(--gold) 0%, var(--gold2) 50%, var(--flame2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+    /* ═══════════════════════════════════════════════════
+       TICKER
+    ═══════════════════════════════════════════════════ */
+    .tick-wrap{overflow:hidden;background:rgba(212,168,83,.05);border-top:1px solid rgba(212,168,83,.1);border-bottom:1px solid rgba(212,168,83,.1)}
+    .tick-inner{display:flex;width:max-content;animation:tick 28s linear infinite}
+    @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .tick-inner:hover{animation-play-state:paused}
 
-    /* ═══ BUTTONS ══════════════════════════════════ */
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: .6rem;
-      background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
-      color: #08090c;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: .82rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: .9rem 2rem;
-      border-radius: 4px;
-      border: none;
-      text-decoration: none;
-      transition: transform .2s, box-shadow .2s, filter .2s;
-      position: relative; overflow: hidden;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(212,168,83,.35);
-      filter: brightness(1.08);
-    }
-    .btn-primary:active { transform: translateY(0); }
+    /* ═══════════════════════════════════════════════════
+       PORTFOLIO CARDS
+    ═══════════════════════════════════════════════════ */
+    .pc{border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.05);transition:border-color .3s,transform .4s,box-shadow .4s}
+    .pc:hover{border-color:rgba(212,168,83,.35);transform:translateY(-5px);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+    .pc-thumb{aspect-ratio:16/10;overflow:hidden;position:relative}
+    .pc-inner{width:100%;height:100%;transition:transform .6s;display:flex;align-items:center;justify-content:center}
+    .pc:hover .pc-inner{transform:scale(1.06)}
+    .pc-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,9,12,.95),rgba(8,9,12,.2) 60%,transparent);opacity:0;transition:opacity .35s;display:flex;align-items:center;justify-content:center}
+    .pc:hover .pc-ov{opacity:1}
+    .play-r{width:62px;height:62px;border-radius:50%;border:2px solid rgba(212,168,83,.8);display:flex;align-items:center;justify-content:center;transform:scale(.7);opacity:0;transition:transform .35s,opacity .35s}
+    .pc:hover .play-r{transform:scale(1);opacity:1}
+    .pc-info{padding:1.1rem 1.25rem 1.25rem;background:var(--panel)}
 
-    .btn-outline {
-      display: inline-flex; align-items: center; gap: .6rem;
-      background: transparent;
-      color: var(--snow);
-      font-family: 'Syne', sans-serif;
-      font-weight: 600;
-      font-size: .82rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: .85rem 2rem;
-      border-radius: 4px;
-      border: 1px solid rgba(238,238,242,.15);
-      text-decoration: none;
-      transition: border-color .25s, background .25s, transform .2s;
-    }
-    .btn-outline:hover {
-      border-color: var(--gold);
-      background: rgba(212,168,83,.06);
-      transform: translateY(-2px);
-    }
+    /* ═══════════════════════════════════════════════════
+       SERVICE / TESTIMONIAL CARDS
+    ═══════════════════════════════════════════════════ */
+    .sc{border:1px solid rgba(255,255,255,.06);border-radius:10px;background:var(--panel);transition:border-color .3s,transform .35s,box-shadow .35s}
+    .sc:hover{border-color:rgba(212,168,83,.3);transform:translateY(-4px);box-shadow:0 16px 50px rgba(0,0,0,.4)}
+    .tc{border:1px solid rgba(255,255,255,.06);border-radius:10px;background:var(--panel);transition:border-color .3s,transform .3s}
+    .tc:hover{border-color:rgba(212,168,83,.25);transform:translateY(-3px)}
 
-    .btn-flame {
-      display: inline-flex; align-items: center; gap: .6rem;
-      background: linear-gradient(135deg, var(--flame) 0%, var(--flame2) 100%);
-      color: #fff;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: .82rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: .9rem 2rem;
-      border-radius: 4px;
-      border: none;
-      text-decoration: none;
-      transition: transform .2s, box-shadow .2s, filter .2s;
-    }
-    .btn-flame:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(232,87,42,.35);
-      filter: brightness(1.1);
-    }
+    /* ═══════════════════════════════════════════════════
+       STEP / FORM / DIVIDER
+    ═══════════════════════════════════════════════════ */
+    .step-n{width:56px;height:56px;border-radius:50%;border:1px solid rgba(212,168,83,.35);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold);flex-shrink:0}
+    .inp{width:100%;background:rgba(22,23,29,.8);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:.8rem 1rem;color:#eeeef2;font-family:'Syne',sans-serif;font-size:.85rem;transition:border-color .25s,box-shadow .25s;outline:none}
+    .inp:focus{border-color:rgba(212,168,83,.5);box-shadow:0 0 0 3px rgba(212,168,83,.08)}
+    .inp::placeholder{color:#3a3b44}
+    select.inp option{background:var(--panel)}
+    .hr{height:1px;background:linear-gradient(to right,transparent,rgba(212,168,83,.2),transparent)}
 
-    /* ═══ REVEAL ANIMATIONS ════════════════════════ */
-    .rv   { opacity:0; transform:translateY(32px); transition:opacity .75s ease, transform .75s ease; }
-    .rv-l { opacity:0; transform:translateX(-40px); transition:opacity .75s ease, transform .75s ease; }
-    .rv-r { opacity:0; transform:translateX(40px);  transition:opacity .75s ease, transform .75s ease; }
-    .rv.on, .rv-l.on, .rv-r.on { opacity:1; transform:none; }
+    /* ═══════════════════════════════════════════════════
+       FILTER TABS
+    ═══════════════════════════════════════════════════ */
+    .ftab{padding:.45rem 1.2rem;border-radius:3px;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(255,255,255,.08);color:#6b6d7a;background:transparent;transition:all .2s}
+    .ftab:hover,.ftab.on{border-color:var(--gold);color:var(--gold);background:rgba(212,168,83,.07)}
 
-    /* ═══ HERO ═════════════════════════════════════ */
-    .hero-bg {
-      background:
-        radial-gradient(ellipse 90% 70% at 65% 45%, rgba(212,168,83,.08) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 20% 70%, rgba(232,87,42,.05) 0%, transparent 55%),
-        #08090c;
-    }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(50px)} to{opacity:1;transform:translateY(0)} }
-    .hu1{opacity:0;animation:fadeUp .9s .1s forwards}
-    .hu2{opacity:0;animation:fadeUp .9s .25s forwards}
-    .hu3{opacity:0;animation:fadeUp .9s .4s forwards}
-    .hu4{opacity:0;animation:fadeUp .9s .55s forwards}
-    .hu5{opacity:0;animation:fadeUp .9s .7s forwards}
-    .hu6{opacity:0;animation:fadeUp .9s .85s forwards}
+    /* ═══════════════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════════════ */
+    #modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(5,5,8,.97);backdrop-filter:blur(16px);align-items:center;justify-content:center}
+    #modal.open{display:flex;animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    #modal-box{width:min(92vw,1000px)}
+    #modal-iframe{width:100%;aspect-ratio:16/9;border-radius:8px;border:none;display:block}
+    .m-close{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:transparent;display:flex;align-items:center;justify-content:center;color:#eeeef2;transition:border-color .2s,background .2s}
+    .m-close:hover{border-color:var(--gold);background:rgba(212,168,83,.1)}
 
-    /* Photo frame */
-    .photo-frame {
-      position: relative;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .photo-frame::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(160deg, rgba(212,168,83,.18) 0%, transparent 50%, rgba(232,87,42,.1) 100%);
-      z-index: 1;
-      pointer-events: none;
-    }
-    .photo-frame img { display:block; width:100%; height:100%; object-fit:cover; }
+    /* ═══════════════════════════════════════════════════
+       MOBILE MENU
+    ═══════════════════════════════════════════════════ */
+    #mob-menu{display:none;flex-direction:column;position:fixed;inset:0;z-index:990;background:#08090c;padding:6rem 2.5rem 3rem;border-top:1px solid rgba(212,168,83,.1)}
+    #mob-menu.open{display:flex;animation:fadeIn .25s ease}
+    #mob-menu a{font-size:2rem;font-family:'Playfair Display',serif;font-weight:700;color:#eeeef2;text-decoration:none;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.05);transition:color .2s}
+    #mob-menu a:hover{color:var(--gold)}
+    .hbar{width:24px;height:1.5px;background:#eeeef2;display:block;transition:all .3s}
+    .hbar2{width:16px}
+    #ham.open .hbar1{transform:rotate(45deg) translate(3.5px,3.5px)}
+    #ham.open .hbar2{opacity:0}
+    #ham.open .hbar3{transform:rotate(-45deg) translate(3.5px,-3.5px)}
 
-    /* Gold border accent */
-    .gold-border {
-      position: absolute;
-      border: 1px solid rgba(212,168,83,.35);
-      border-radius: 16px;
-      pointer-events: none;
-    }
+    /* ═══════════════════════════════════════════════════
+       SOCIAL LINKS
+    ═══════════════════════════════════════════════════ */
+    .slink{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border:1px solid rgba(255,255,255,.07);border-radius:8px;text-decoration:none;transition:border-color .25s,background .25s,transform .2s}
+    .slink:hover{transform:translateX(4px)}
+    .slink.wa:hover{border-color:#25D366;background:rgba(37,211,102,.05)}
+    .slink.ig:hover{border-color:#e1306c;background:rgba(225,48,108,.05)}
+    .slink.em:hover{border-color:var(--gold);background:rgba(212,168,83,.05)}
 
-    /* ═══ TICKER ═══════════════════════════════════ */
-    .ticker-wrap { overflow: hidden; background: rgba(212,168,83,.06); border-top:1px solid rgba(212,168,83,.1); border-bottom:1px solid rgba(212,168,83,.1); }
-    .ticker-inner { display:flex; width:max-content; animation: scroll 28s linear infinite; }
-    @keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-    .ticker-inner:hover { animation-play-state: paused; }
+    /* ═══════════════════════════════════════════════════
+       WHATSAPP FLOAT
+    ═══════════════════════════════════════════════════ */
+    @keyframes wap{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.4)}70%{box-shadow:0 0 0 14px rgba(37,211,102,0)}}
+    #wa-float{position:fixed;bottom:1.75rem;right:1.75rem;z-index:600;width:54px;height:54px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.3);animation:wap 2.2s infinite;transition:transform .2s;text-decoration:none}
+    #wa-float:hover{transform:scale(1.1)}
 
-    /* ═══ PORTFOLIO CARDS ══════════════════════════ */
-    .pcard {
-      position: relative; border-radius: 10px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,.05);
-      transition: border-color .3s, transform .4s, box-shadow .4s;
-      cursor: pointer;
-    }
-    .pcard:hover {
-      border-color: rgba(212,168,83,.35);
-      transform: translateY(-5px);
-      box-shadow: 0 24px 60px rgba(0,0,0,.5);
-    }
-    .pcard-thumb {
-      aspect-ratio: 16/10;
-      overflow: hidden;
-      position: relative;
-    }
-    .pcard-thumb-inner {
-      width: 100%; height: 100%;
-      transition: transform .6s ease;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .pcard:hover .pcard-thumb-inner { transform: scale(1.06); }
-    .pcard-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(8,9,12,.95) 0%, rgba(8,9,12,.2) 60%, transparent 100%);
-      opacity: 0; transition: opacity .35s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .pcard:hover .pcard-overlay { opacity: 1; }
-    .play-ring {
-      width: 62px; height: 62px; border-radius: 50%;
-      border: 2px solid rgba(212,168,83,.8);
-      display: flex; align-items: center; justify-content: center;
-      transform: scale(.7); opacity: 0;
-      transition: transform .35s, opacity .35s;
-    }
-    .pcard:hover .play-ring { transform: scale(1); opacity: 1; }
-    .pcard-info { padding: 1.1rem 1.25rem 1.25rem; background: #16171d; }
+    /* ═══════════════════════════════════════════════════
+       SKELETON
+    ═══════════════════════════════════════════════════ */
+    .skel{background:linear-gradient(90deg,#16171d 25%,#1e2028 50%,#16171d 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    /* ═══ SERVICE CARDS ════════════════════════════ */
-    .scard {
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 10px;
-      background: #16171d;
-      transition: border-color .3s, transform .35s, box-shadow .35s;
-    }
-    .scard:hover {
-      border-color: rgba(212,168,83,.3);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 50px rgba(0,0,0,.4);
-    }
-    .scard-icon {
-      width: 52px; height: 52px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      margin-bottom: 1.2rem;
-    }
+    /* ═══════════════════════════════════════════════════
+       ██████╗ ███╗   ███╗███████╗
+       ██╔════╝████╗ ████║██╔════╝
+       ██║     ██╔████╔██║███████╗
+       ██║     ██║╚██╔╝██║╚════██║
+       ╚██████╗██║ ╚═╝ ██║███████║
+        ╚═════╝╚═╝     ╚═╝╚══════╝
+       GOOGLE SHEETS API PANEL
+    ═══════════════════════════════════════════════════ */
+    #cms-btn{position:fixed;bottom:1.75rem;left:1.75rem;z-index:600;width:46px;height:46px;border-radius:50%;background:#0f1014;border:1px solid rgba(212,168,83,.2);display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+    #cms-btn:hover{border-color:var(--gold);background:rgba(212,168,83,.1);transform:scale(1.08)}
+    #cms-btn.active{border-color:var(--gold);background:rgba(212,168,83,.12)}
 
-    /* ═══ TESTIMONIAL CARDS ════════════════════════ */
-    .tcard {
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 10px;
-      background: #16171d;
-      transition: border-color .3s, transform .3s;
-    }
-    .tcard:hover { border-color: rgba(212,168,83,.25); transform: translateY(-3px); }
+    #cms-drawer{position:fixed;bottom:0;left:0;right:0;z-index:8000;transform:translateY(calc(100% + 1px));transition:transform .38s cubic-bezier(.4,0,.2,1);background:#0a0b0f;border-top:1px solid rgba(212,168,83,.18);box-shadow:0 -24px 80px rgba(0,0,0,.8)}
+    #cms-drawer.open{transform:translateY(0)}
+    #cms-inner{max-width:1000px;margin:0 auto;padding:1.6rem 2rem 2rem}
 
-    /* ═══ PROCESS STEPS ════════════════════════════ */
-    .step-num {
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 1px solid rgba(212,168,83,.35);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem; font-weight: 700;
-      color: var(--gold);
-      flex-shrink: 0;
-    }
+    /* drawer tabs */
+    .dtab{padding:.4rem 1rem;border-radius:3px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(255,255,255,.08);color:#6b6d7a;background:transparent;transition:all .15s}
+    .dtab:hover,.dtab.on{border-color:var(--gold);color:var(--gold);background:rgba(212,168,83,.07)}
 
-    /* ═══ STATS ════════════════════════════════════ */
-    .stat-val { font-family:'Playfair Display',serif; font-weight:900; }
+    /* API inputs */
+    .api-inp{width:100%;background:rgba(5,5,8,.9);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.65rem 1rem;color:#eeeef2;font-family:'JetBrains Mono',monospace;font-size:.73rem;outline:none;transition:border-color .2s;margin-top:.35rem}
+    .api-inp:focus{border-color:rgba(212,168,83,.5);box-shadow:0 0 0 3px rgba(212,168,83,.07)}
+    .api-inp::placeholder{color:#3a3b44}
 
-    /* ═══ FORM ══════════════════════════════════════ */
-    .inp {
-      width: 100%;
-      background: rgba(22,23,29,.8);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 6px;
-      padding: .8rem 1rem;
-      color: #eeeef2;
-      font-family: 'Syne', sans-serif;
-      font-size: .85rem;
-      transition: border-color .25s, box-shadow .25s;
-      outline: none;
-    }
-    .inp:focus { border-color: rgba(212,168,83,.5); box-shadow: 0 0 0 3px rgba(212,168,83,.08); }
-    .inp::placeholder { color: #3a3b44; }
-    select.inp option { background: #16171d; }
+    /* status badge */
+    .sbadge{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;padding:.28rem .75rem;border-radius:999px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em}
+    .sbadge.idle{border:1px solid rgba(255,255,255,.1);color:#6b6d7a}
+    .sbadge.loading{border:1px solid rgba(212,168,83,.3);color:var(--gold)}
+    .sbadge.ok{border:1px solid rgba(34,197,94,.3);color:#4ade80}
+    .sbadge.err{border:1px solid rgba(239,68,68,.3);color:#f87171}
+    .sbadge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .sbadge.idle .sbadge-dot{background:#6b6d7a}
+    .sbadge.loading .sbadge-dot{background:var(--gold);animation:blink .8s infinite}
+    .sbadge.ok .sbadge-dot{background:#4ade80}
+    .sbadge.err .sbadge-dot{background:#f87171}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-    /* ═══ VIDEO MODAL ══════════════════════════════ */
-    #modal {
-      display: none; position: fixed; inset: 0; z-index: 9000;
-      background: rgba(5,5,8,.97);
-      backdrop-filter: blur(16px);
-      align-items: center; justify-content: center;
-    }
-    #modal.open { display: flex; animation: mIn .3s ease; }
-    @keyframes mIn { from{opacity:0} to{opacity:1} }
-    #modal-box { width: min(92vw, 1000px); }
-    #modal-iframe { width:100%; aspect-ratio:16/9; border-radius:8px; border:none; display:block; }
-    .modal-close {
-      width:40px;height:40px;border-radius:50%;
-      border:1px solid rgba(255,255,255,.15);
-      background:transparent;
-      display:flex;align-items:center;justify-content:center;
-      color:#eeeef2;
-      transition:border-color .2s,background .2s;
-    }
-    .modal-close:hover { border-color:var(--gold); background:rgba(212,168,83,.1); }
+    /* column reference chips */
+    .chip{display:inline-block;background:#16171d;border-radius:3px;padding:.15rem .55rem;font-size:.68rem;font-family:'JetBrains Mono',monospace}
+    .chip.req{color:var(--gold);border:1px solid rgba(212,168,83,.2)}
+    .chip.opt{color:#9a9caa;border:1px solid rgba(255,255,255,.07)}
 
-    /* ═══ WHATSAPP FLOAT ═══════════════════════════ */
-    @keyframes waPulse {
-      0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.4)}
-      70%{box-shadow:0 0 0 14px rgba(37,211,102,0)}
-    }
-    #wa-float {
-      position:fixed;bottom:1.75rem;right:1.75rem;z-index:500;
-      width:54px;height:54px;border-radius:50%;
-      background:#25D366;
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:0 4px 20px rgba(37,211,102,.3);
-      animation:waPulse 2.2s infinite;
-      transition:transform .2s;
-      text-decoration:none;
-    }
-    #wa-float:hover { transform:scale(1.1); }
+    /* apply button inside panel */
+    .apply-btn{display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--gold),#f0c96e);color:#08090c;font-family:'Syne',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 1.3rem;border-radius:4px;border:none;transition:filter .2s,transform .2s}
+    .apply-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
 
-    /* ═══ FILTER TABS ══════════════════════════════ */
-    .ftab {
-      padding:.45rem 1.2rem;
-      border-radius:3px;
-      font-size:.75rem;
-      font-weight:700;
-      letter-spacing:.1em;
-      text-transform:uppercase;
-      border:1px solid rgba(255,255,255,.08);
-      color:#6b6d7a;
-      background:transparent;
-      transition:all .2s;
-    }
-    .ftab:hover,.ftab.on { border-color:var(--gold); color:var(--gold); background:rgba(212,168,83,.07); }
+    /* steps strip */
+    .how-step{display:flex;align-items:flex-start;gap:.75rem;font-size:.78rem;color:#6b6d7a}
+    .how-step strong{color:#eeeef2}
+    .how-num{width:22px;height:22px;border-radius:50%;border:1px solid rgba(212,168,83,.3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--gold);flex-shrink:0;margin-top:.05rem}
 
-    /* ═══ MOBILE MENU ══════════════════════════════ */
-    #mob-menu {
-      display:none; flex-direction:column; gap:0;
-      position:fixed; inset:0; z-index:990;
-      background:#08090c;
-      padding:6rem 2.5rem 3rem;
-      border-top:1px solid rgba(212,168,83,.1);
-    }
-    #mob-menu.open { display:flex; animation:mIn .25s ease; }
-    #mob-menu a {
-      font-size:2rem;
-      font-family:'Playfair Display',serif;
-      font-weight:700;
-      color:#eeeef2;
-      text-decoration:none;
-      padding:.75rem 0;
-      border-bottom:1px solid rgba(255,255,255,.05);
-      transition:color .2s;
-    }
-    #mob-menu a:hover { color:var(--gold); }
-
-    /* Hamburger */
-    .hbar { width:24px;height:1.5px;background:#eeeef2;display:block;transition:all .3s; }
-    .hbar2 { width:16px; }
-    #ham.open .hbar1 { transform:rotate(45deg) translate(3.5px,3.5px); }
-    #ham.open .hbar2 { opacity:0; transform:translateX(-8px); }
-    #ham.open .hbar3 { transform:rotate(-45deg) translate(3.5px,-3.5px); }
-
-    /* ═══ ABOUT / PHOTO SECTION ════════════════════ */
-    .about-photo-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 420px;
-    }
-    .about-photo-bg {
-      position: absolute;
-      inset: -2px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(212,168,83,.4) 0%, rgba(232,87,42,.2) 50%, transparent 100%);
-      z-index: 0;
-    }
-    .about-photo-inner {
-      position: relative; z-index: 1;
-      border-radius: 16px; overflow: hidden;
-      aspect-ratio: 3/4;
-    }
-    .about-photo-placeholder {
-      width: 100%; height: 100%;
-      background: linear-gradient(160deg, #1e2028 0%, #141418 60%, #0f1014 100%);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 1rem;
-    }
-    /* Floating experience badge */
-    .exp-badge {
-      position: absolute; bottom: -20px; right: -20px; z-index: 10;
-      background: linear-gradient(135deg, var(--gold), var(--gold2));
-      color: #08090c;
-      border-radius: 12px;
-      padding: 1rem 1.4rem;
-      text-align: center;
-      box-shadow: 0 16px 40px rgba(0,0,0,.6);
-    }
-    /* Available badge */
-    .avail-badge {
-      position: absolute; top: -16px; left: -16px; z-index: 10;
-      background: #0f1014;
-      border: 1px solid rgba(212,168,83,.3);
-      border-radius: 999px;
-      padding: .5rem 1.1rem;
-      display: flex; align-items: center; gap: .5rem;
-      box-shadow: 0 8px 30px rgba(0,0,0,.5);
-      white-space: nowrap;
-    }
-
-    /* ═══ DIVIDER ═══════════════════════════════════ */
-    .hr { height:1px; background:linear-gradient(to right, transparent, rgba(212,168,83,.2), transparent); }
-
-    /* Form success */
-    #form-ok { display:none; }
-
-    /* ═══ CONTACT SOCIAL LINKS ══════════════════════ */
-    .soc-link {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 1rem 1.25rem;
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 8px;
-      text-decoration: none;
-      transition: border-color .25s, background .25s, transform .2s;
-    }
-    .soc-link:hover { transform: translateX(4px); }
-    .soc-link.wa:hover  { border-color: #25D366; background: rgba(37,211,102,.05); }
-    .soc-link.ig:hover  { border-color: #e1306c; background: rgba(225,48,108,.05); }
-    .soc-link.em:hover  { border-color: var(--gold); background: rgba(212,168,83,.05); }
-
-    @media(max-width:767px){
-      .about-photo-wrap { max-width:100%; }
-      .exp-badge { right:0; bottom:-16px; }
-      .avail-badge { left: 0; top:-16px; }
-    }
+    /* drawer tab panes */
+    .dpane{display:none}.dpane.on{display:block}
   </style>
 </head>
 <body>
 
-<!-- CUSTOM CURSOR -->
 <div id="dot"></div>
 <div id="ring"></div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     CMS BUTTON (bottom-left)
+═══════════════════════════════════════════════════════════ -->
+<button id="cms-btn" onclick="toggleDrawer()" title="Google Sheets CMS">
+  <!-- Sheets icon -->
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--gold)" stroke-width="1.6"/>
+    <line x1="3" y1="8" x2="21" y2="8" stroke="var(--gold)" stroke-width="1.4"/>
+    <line x1="3" y1="13" x2="21" y2="13" stroke="var(--gold)" stroke-width="1.4"/>
+    <line x1="9" y1="8" x2="9" y2="21" stroke="var(--gold)" stroke-width="1.4"/>
+  </svg>
+</button>
 
-<!-- ══════════════════════════════════════════════════════
-     NAVIGATION
-══════════════════════════════════════════════════════ -->
-<nav id="nav" class="flex items-center justify-between h-20">
-  <!-- Logo -->
-  <a href="#home" class="flex items-center gap-3 z-10" style="text-decoration:none">
-    <div class="w-8 h-8 rounded" style="background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg>
+<!-- ═══════════════════════════════════════════════════════════
+     CMS DRAWER — slides up from bottom
+═══════════════════════════════════════════════════════════ -->
+<div id="cms-drawer" role="complementary" aria-label="Google Sheets CMS">
+  <div id="cms-inner">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--gold)" stroke-width="1.8"/><line x1="3" y1="8" x2="21" y2="8" stroke="var(--gold)" stroke-width="1.5"/><line x1="3" y1="13" x2="21" y2="13" stroke="var(--gold)" stroke-width="1.5"/><line x1="9" y1="8" x2="9" y2="21" stroke="var(--gold)" stroke-width="1.5"/></svg>
+        <span class="lbl" style="font-size:.66rem">Google Sheets API — Live CMS</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <span id="global-status" class="sbadge idle"><span class="sbadge-dot"></span>Not connected</span>
+        <button onclick="toggleDrawer()" style="background:none;border:none;color:#6b6d7a;font-size:1rem;padding:.2rem .4rem;line-height:1">✕</button>
+      </div>
     </div>
-    <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">RAJ <span style="color:var(--gold)">SAHU</span></span>
-  </a>
 
-  <!-- Desktop links -->
-  <div class="hidden md:flex items-center gap-8">
-    <a href="#about"        class="nav-link">About</a>
-    <a href="#work"         class="nav-link">Work</a>
-    <a href="#services"     class="nav-link">Services</a>
-    <a href="#process"      class="nav-link">Process</a>
-    <a href="#testimonials" class="nav-link">Reviews</a>
-    <a href="#contact"      class="nav-link">Contact</a>
-  </div>
+    <!-- Two-column layout: left = config, right = how-to -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem" class="md:grid-cols-2">
 
-  <!-- Desktop CTA -->
-  <div class="hidden md:flex items-center gap-4">
-    <span class="flex items-center gap-2 label" style="color:#9a9caa">
-      <span class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"></span>
-      Available
-    </span>
-    <a href="#contact" class="btn-primary" style="padding:.65rem 1.4rem;font-size:.75rem">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-      Start Project
-    </a>
-  </div>
+      <!-- LEFT: API config + section tabs -->
+      <div>
+        <!-- API credentials block -->
+        <div style="background:rgba(212,168,83,.04);border:1px solid rgba(212,168,83,.1);border-radius:8px;padding:1rem;margin-bottom:1.1rem">
+          <div class="lbl" style="font-size:.6rem;margin-bottom:.6rem">Step 1 — API Credentials (stored locally, never sent anywhere)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+            <div>
+              <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">API KEY</div>
+              <input id="cfg-apikey" class="api-inp" type="password" placeholder="AIza…" autocomplete="off" oninput="saveCfg()"/>
+              <div style="font-size:.62rem;color:#3a3b44;margin-top:.3rem">Google Cloud Console → Credentials</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SPREADSHEET ID</div>
+              <input id="cfg-sheetid" class="api-inp" type="text" placeholder="1BxiM…" autocomplete="off" oninput="saveCfg()"/>
+              <div style="font-size:.62rem;color:#3a3b44;margin-top:.3rem">From the Sheet URL: /d/<strong style="color:var(--gold)">ID</strong>/edit</div>
+            </div>
+          </div>
+        </div>
 
-  <!-- Hamburger -->
-  <button id="ham" onclick="toggleMenu()" class="md:hidden flex flex-col gap-1.5 p-2 z-[1001]" aria-label="Menu">
-    <span class="hbar hbar1"></span>
-    <span class="hbar hbar2"></span>
-    <span class="hbar hbar3"></span>
-  </button>
-</nav>
+        <!-- Section tabs -->
+        <div style="margin-bottom:.75rem">
+          <div class="lbl" style="font-size:.6rem;margin-bottom:.6rem">Step 2 — Configure Each Section</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem">
+            <button class="dtab on" onclick="switchTab('portfolio',this)">📹 Portfolio</button>
+            <button class="dtab" onclick="switchTab('services',this)">⚙ Services</button>
+            <button class="dtab" onclick="switchTab('testimonials',this)">💬 Testimonials</button>
+            <button class="dtab" onclick="switchTab('contact',this)">📞 Contact</button>
+          </div>
 
-<!-- Mobile menu -->
-<div id="mob-menu">
-  <a href="#about"        onclick="closeMenu()">About</a>
-  <a href="#work"         onclick="closeMenu()">Work</a>
-  <a href="#services"     onclick="closeMenu()">Services</a>
-  <a href="#process"      onclick="closeMenu()">Process</a>
-  <a href="#testimonials" onclick="closeMenu()">Reviews</a>
-  <a href="#contact"      onclick="closeMenu()">Contact</a>
-  <div style="margin-top:2rem">
-    <a href="#contact" onclick="closeMenu()" class="btn-primary">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-      Start Project
-    </a>
+          <!-- ── Portfolio pane ── -->
+          <div id="dpane-portfolio" class="dpane on">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
+                <input id="tab-portfolio" class="api-inp" placeholder="Portfolio" value="Portfolio" oninput="saveCfg()"/>
+              </div>
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
+                <input id="row-portfolio" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
+              </div>
+            </div>
+            <div style="margin-bottom:.7rem">
+              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+                <span class="chip req">title</span><span class="chip req">category</span><span class="chip req">videourl</span><span class="chip req">tags</span><span class="chip opt">emoji</span><span class="chip opt">bgcolor</span>
+              </div>
+              <div style="font-size:.65rem;color:#6b6d7a;margin-top:.35rem">tags → pipe-separated: <code style="color:var(--gold)">Cut · Color | Motion | SFX</code></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <button class="apply-btn" onclick="applySection('portfolio')">↻ Load Portfolio</button>
+              <span id="st-portfolio" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
+            </div>
+          </div>
+
+          <!-- ── Services pane ── -->
+          <div id="dpane-services" class="dpane">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
+                <input id="tab-services" class="api-inp" placeholder="Services" value="Services" oninput="saveCfg()"/>
+              </div>
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
+                <input id="row-services" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
+              </div>
+            </div>
+            <div style="margin-bottom:.7rem">
+              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+                <span class="chip req">name</span><span class="chip req">description</span><span class="chip req">price</span><span class="chip opt">icon</span><span class="chip opt">highlight</span>
+              </div>
+              <div style="font-size:.65rem;color:#6b6d7a;margin-top:.35rem"><code style="color:var(--gold)">highlight</code> column → type <code style="color:#9a9caa">yes</code> to give a card a glow effect</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <button class="apply-btn" onclick="applySection('services')">↻ Load Services</button>
+              <span id="st-services" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
+            </div>
+          </div>
+
+          <!-- ── Testimonials pane ── -->
+          <div id="dpane-testimonials" class="dpane">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
+                <input id="tab-testimonials" class="api-inp" placeholder="Testimonials" value="Testimonials" oninput="saveCfg()"/>
+              </div>
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
+                <input id="row-testimonials" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
+              </div>
+            </div>
+            <div style="margin-bottom:.7rem">
+              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+                <span class="chip req">name</span><span class="chip req">role</span><span class="chip req">review</span><span class="chip opt">initials</span><span class="chip opt">avatarcolor</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <button class="apply-btn" onclick="applySection('testimonials')">↻ Load Testimonials</button>
+              <span id="st-testimonials" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
+            </div>
+          </div>
+
+          <!-- ── Contact pane ── -->
+          <div id="dpane-contact" class="dpane">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
+                <input id="tab-contact" class="api-inp" placeholder="Contact" value="Contact" oninput="saveCfg()"/>
+              </div>
+              <div>
+                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
+                <input id="row-contact" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
+              </div>
+            </div>
+            <div style="margin-bottom:.7rem">
+              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
+              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+                <span class="chip req">whatsapp</span><span class="chip req">instagram</span><span class="chip req">email</span><span class="chip opt">whatsapplabel</span><span class="chip opt">instagramlabel</span><span class="chip opt">emaillabel</span>
+              </div>
+              <div style="font-size:.65rem;color:#6b6d7a;margin-top:.35rem">Single data row. Put number/handle/address in the required fields.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <button class="apply-btn" onclick="applySection('contact')">↻ Load Contact</button>
+              <span id="st-contact" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Load all button -->
+        <button class="apply-btn" style="margin-top:.5rem;padding:.65rem 1.6rem;font-size:.76rem" onclick="loadAll()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          Load All Sections
+        </button>
+      </div>
+
+      <!-- RIGHT: How-to guide -->
+      <div>
+        <div class="lbl" style="font-size:.6rem;margin-bottom:.85rem">How to set up — 5 steps</div>
+        <div style="display:flex;flex-direction:column;gap:.85rem;margin-bottom:1.25rem">
+          <div class="how-step">
+            <div class="how-num">1</div>
+            <div><strong>Create a Google Sheet</strong> with tabs named exactly as configured (default: Portfolio, Services, Testimonials, Contact). Add column headers in row 1.</div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">2</div>
+            <div><strong>Enable Sheets API</strong> — go to Google Cloud Console → APIs &amp; Services → Enable <em>Google Sheets API</em>.</div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">3</div>
+            <div><strong>Create an API Key</strong> — Credentials → Create Credentials → API Key. Restrict it to "Google Sheets API" and your site domain for security.</div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">4</div>
+            <div><strong>Share your Sheet</strong> — click Share → Anyone with the link → <em>Viewer</em>. The API key reads public sheets only.</div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">5</div>
+            <div><strong>Paste your API Key + Sheet ID</strong> above, set the tab names, click <em>Load All Sections</em>. Done — your site updates live from the sheet.</div>
+          </div>
+        </div>
+
+        <!-- Quick sheet template reference -->
+        <div style="background:rgba(212,168,83,.04);border:1px solid rgba(212,168,83,.1);border-radius:8px;padding:.9rem">
+          <div class="lbl" style="font-size:.6rem;margin-bottom:.6rem">Sheet ID from URL</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#9a9caa;line-height:1.9;word-break:break-all">
+            https://docs.google.com/spreadsheets/d/<span style="color:var(--gold);background:rgba(212,168,83,.1);padding:.05rem .3rem;border-radius:3px">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</span>/edit
+          </div>
+          <div style="font-size:.65rem;color:#6b6d7a;margin-top:.4rem">The highlighted portion between <code style="color:#9a9caa">/d/</code> and <code style="color:#9a9caa">/edit</code> is your Sheet ID.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     HERO SECTION
-══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════════════════════ -->
+<nav id="nav" class="flex items-center justify-between h-20">
+  <a href="#home" style="text-decoration:none;display:flex;align-items:center;gap:.75rem;z-index:10">
+    <div style="width:32px;height:32px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg></div>
+    <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">ALEX <span style="color:var(--gold)">RIVERA</span></span>
+  </a>
+  <div class="hidden md:flex items-center gap-8">
+    <a href="#about"        class="nl">About</a>
+    <a href="#work"         class="nl">Work</a>
+    <a href="#services"     class="nl">Services</a>
+    <a href="#process"      class="nl">Process</a>
+    <a href="#testimonials" class="nl">Reviews</a>
+    <a href="#contact"      class="nl">Contact</a>
+  </div>
+  <div class="hidden md:flex items-center gap-4">
+    <span class="flex items-center gap-2 lbl" style="color:#9a9caa;font-size:.7rem"><span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;animation:blink .8s infinite"></span>Available</span>
+    <a href="#contact" class="btn-g" style="padding:.65rem 1.4rem;font-size:.75rem"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Start Project</a>
+  </div>
+  <button id="ham" onclick="toggleMenu()" class="md:hidden flex flex-col gap-1.5 p-2 z-[1001]"><span class="hbar hbar1"></span><span class="hbar hbar2"></span><span class="hbar hbar3"></span></button>
+</nav>
+<div id="mob-menu">
+  <a href="#about" onclick="closeMenu()">About</a><a href="#work" onclick="closeMenu()">Work</a>
+  <a href="#services" onclick="closeMenu()">Services</a><a href="#process" onclick="closeMenu()">Process</a>
+  <a href="#testimonials" onclick="closeMenu()">Reviews</a><a href="#contact" onclick="closeMenu()">Contact</a>
+  <div style="margin-top:2rem"><a href="#contact" onclick="closeMenu()" class="btn-g"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Start Project</a></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════════════ -->
 <section id="home" class="hero-bg min-h-screen flex items-center pt-20 pb-16 px-6 md:px-10 relative overflow-hidden">
-
-  <!-- Decorative grid lines -->
-  <div class="absolute inset-0 pointer-events-none" style="background-image:linear-gradient(rgba(212,168,83,.03) 1px, transparent 1px),linear-gradient(90deg,rgba(212,168,83,.03) 1px,transparent 1px);background-size:60px 60px;"></div>
-
+  <div class="absolute inset-0 pointer-events-none" style="background-image:linear-gradient(rgba(212,168,83,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(212,168,83,.03) 1px,transparent 1px);background-size:60px 60px"></div>
   <div class="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-16 items-center">
-
-    <!-- LEFT: Copy -->
     <div>
-      <div class="label mb-5 hu1 flex items-center gap-3">
-        <div class="h-px w-10" style="background:var(--gold)"></div>
-        Video Editor &amp; Colorist
-      </div>
-
+      <div class="lbl mb-5 hu flex items-center gap-3" style="animation-delay:.1s"><div style="height:1px;width:40px;background:var(--gold)"></div>Video Editor &amp; Colorist</div>
       <h1 class="font-serif leading-[1.05] mb-6" style="font-size:clamp(3rem,6.5vw,5.8rem)">
-        <span class="hu2 block" style="color:#eeeef2">Your Story.</span>
-        <span class="hu3 block gold-grad">Perfectly</span>
-        <span class="hu4 block" style="color:#eeeef2">Edited.</span>
-        <span class="hu5 block" style="font-style:italic;color:rgba(238,238,242,.45);font-size:clamp(2rem,4vw,3.5rem)">Same Day.</span>
+        <span class="hu block" style="color:#eeeef2;animation-delay:.2s">Your Story.</span>
+        <span class="hu block grad" style="animation-delay:.35s">Perfectly</span>
+        <span class="hu block" style="color:#eeeef2;animation-delay:.5s">Edited.</span>
+        <span class="hu block" style="font-style:italic;color:rgba(238,238,242,.42);font-size:clamp(2rem,4vw,3.5rem);animation-delay:.65s">Same Day.</span>
       </h1>
-
-      <p class="hu6 mb-10 leading-relaxed" style="color:#6b6d7a;max-width:440px;font-size:1rem">
-        Premium cinematic video editing for creators &amp; brands.
-        Send your footage — receive a publish-ready masterpiece within
-        <strong style="color:#eeeef2">24 hours</strong>, guaranteed.
-      </p>
-
-      <div class="hu6 flex flex-wrap gap-4 mb-14">
-        <a href="#contact" class="btn-primary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-          Get Your Video Edited Today
-        </a>
-        <a href="#work" class="btn-outline">
-          View Portfolio
-        </a>
+      <p class="hu mb-10 leading-relaxed" style="color:#6b6d7a;max-width:440px;font-size:1rem;animation-delay:.8s">Premium cinematic video editing for creators &amp; brands. Send your footage — receive a publish-ready masterpiece within <strong style="color:#eeeef2">24 hours</strong>, guaranteed.</p>
+      <div class="hu flex flex-wrap gap-4 mb-14" style="animation-delay:.95s">
+        <a href="#contact" class="btn-g"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Get Your Video Edited Today</a>
+        <a href="#work" class="btn-o">View Portfolio</a>
       </div>
-
-      <!-- Stats row -->
-      <div class="hu6 flex flex-wrap gap-8 pt-8" style="border-top:1px solid rgba(255,255,255,.07)">
-        <div>
-          <div class="stat-val text-4xl" style="color:#eeeef2">200<span style="color:var(--gold)">+</span></div>
-          <div class="label mt-1" style="color:#6b6d7a;letter-spacing:.1em">Videos Delivered</div>
-        </div>
+      <div class="hu flex flex-wrap gap-8 pt-8" style="border-top:1px solid rgba(255,255,255,.07);animation-delay:1.1s">
+        <div><div class="stat-val text-4xl" style="color:#eeeef2">200<span style="color:var(--gold)">+</span></div><div class="lbl mt-1" style="color:#6b6d7a;letter-spacing:.1em">Videos Delivered</div></div>
         <div style="width:1px;background:rgba(255,255,255,.07)"></div>
-        <div>
-          <div class="stat-val text-4xl" style="color:#eeeef2">24<span style="color:var(--gold)">H</span></div>
-          <div class="label mt-1" style="color:#6b6d7a;letter-spacing:.1em">Turnaround</div>
-        </div>
+        <div><div class="stat-val text-4xl" style="color:#eeeef2">24<span style="color:var(--gold)">H</span></div><div class="lbl mt-1" style="color:#6b6d7a;letter-spacing:.1em">Turnaround</div></div>
         <div style="width:1px;background:rgba(255,255,255,.07)"></div>
-        <div>
-          <div class="stat-val text-4xl" style="color:#eeeef2">98<span style="color:var(--gold)">%</span></div>
-          <div class="label mt-1" style="color:#6b6d7a;letter-spacing:.1em">Satisfaction</div>
-        </div>
+        <div><div class="stat-val text-4xl" style="color:#eeeef2">98<span style="color:var(--gold)">%</span></div><div class="lbl mt-1" style="color:#6b6d7a;letter-spacing:.1em">Satisfaction</div></div>
       </div>
     </div>
-
-    <!-- RIGHT: Photo -->
     <div class="hidden lg:flex justify-center">
-      <div class="about-photo-wrap">
-        <div class="about-photo-bg"></div>
-        <div class="about-photo-inner" style="box-shadow:0 40px 100px rgba(0,0,0,.7)">
-          <!-- PLACEHOLDER PHOTO — replace src with real image -->
-          <div class="about-photo-placeholder">
-            <!-- Silhouette SVG placeholder -->
-            <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
-              <circle cx="60" cy="40" r="28" fill="rgba(212,168,83,.15)" stroke="rgba(212,168,83,.3)" stroke-width="1.5"/>
-              <ellipse cx="60" cy="105" rx="48" ry="30" fill="rgba(212,168,83,.08)" stroke="rgba(212,168,83,.2)" stroke-width="1.5"/>
-              <circle cx="60" cy="40" r="20" fill="rgba(212,168,83,.2)"/>
-            </svg>
-            <div style="text-align:center">
-              <div class="label" style="color:rgba(212,168,83,.6);margin-bottom:.3rem">Your Photo Here</div>
-              <div style="font-size:.75rem;color:#3a3b44">Replace with real portrait</div>
-            </div>
+      <div class="photo-wrap">
+        <div class="photo-glow"></div>
+        <div class="photo-inner" style="box-shadow:0 40px 100px rgba(0,0,0,.7)">
+          <!-- ★ REPLACE with: <img src="alex.jpg" alt="Raj Sahu" style="width:100%;height:100%;object-fit:cover"/> -->
+          <div class="photo-ph">
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none"><circle cx="60" cy="40" r="28" fill="rgba(212,168,83,.15)" stroke="rgba(212,168,83,.3)" stroke-width="1.5"/><ellipse cx="60" cy="105" rx="48" ry="30" fill="rgba(212,168,83,.08)" stroke="rgba(212,168,83,.2)" stroke-width="1.5"/><circle cx="60" cy="40" r="20" fill="rgba(212,168,83,.2)"/></svg>
+            <div style="text-align:center"><div class="lbl" style="color:rgba(212,168,83,.6);margin-bottom:.3rem">Photo Here</div><div style="font-size:.72rem;color:#3a3b44">Replace placeholder with real image</div></div>
           </div>
         </div>
-        <!-- Experience badge -->
-        <div class="exp-badge">
-          <div class="stat-val text-3xl" style="color:#08090c">5+</div>
-          <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(8,9,12,.7);margin-top:.1rem">Years Exp.</div>
-        </div>
-        <!-- Available badge -->
-        <div class="avail-badge">
-          <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
-          <span style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#eeeef2">Available Today</span>
-        </div>
+        <div class="exp-b"><div class="stat-val text-3xl" style="color:#08090c">5+</div><div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(8,9,12,.7);margin-top:.1rem">Years Exp.</div></div>
+        <div class="avail-b"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;animation:blink .8s infinite;flex-shrink:0"></span><span style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#eeeef2">Available Today</span></div>
       </div>
     </div>
-
   </div>
-
-  <!-- Scroll hint -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style="opacity:.35">
-    <div style="width:1px;height:40px;background:linear-gradient(to bottom,var(--gold),transparent);animation:fadeUp 1.5s 2s ease infinite alternate"></div>
-    <span class="label" style="font-size:.6rem">Scroll</span>
-  </div>
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" style="opacity:.35"><div style="width:1px;height:40px;background:linear-gradient(to bottom,var(--gold),transparent)"></div><span class="lbl" style="font-size:.58rem">Scroll</span></div>
 </section>
 
 
-<!-- ══════════════════════════════════════════════════════
-     TICKER
-══════════════════════════════════════════════════════ -->
-<div class="ticker-wrap py-3">
-  <div class="ticker-inner" id="ticker"></div>
-</div>
+<!-- TICKER -->
+<div class="tick-wrap py-3"><div class="tick-inner" id="ticker"></div></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     ABOUT / MEET Raj Sahu
-══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     ABOUT
+═══════════════════════════════════════════════════════════ -->
 <section id="about" class="py-28 px-6 md:px-10">
   <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-
-    <!-- Photo left -->
     <div class="flex justify-center lg:justify-start rv-l">
-      <div class="about-photo-wrap">
-        <div class="about-photo-bg"></div>
-        <div class="about-photo-inner" style="box-shadow:0 40px 100px rgba(0,0,0,.7)">
-          <!-- PLACEHOLDER — replace with: <img src="alex-photo.jpg" alt="Alex Rivera"/> -->
-          <div class="about-photo-placeholder">
-            <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
-              <circle cx="60" cy="40" r="28" fill="rgba(212,168,83,.15)" stroke="rgba(212,168,83,.3)" stroke-width="1.5"/>
-              <ellipse cx="60" cy="105" rx="48" ry="30" fill="rgba(212,168,83,.08)" stroke="rgba(212,168,83,.2)" stroke-width="1.5"/>
-              <circle cx="60" cy="40" r="20" fill="rgba(212,168,83,.25)"/>
-            </svg>
-            <div style="text-align:center;padding:0 2rem">
-              <div class="label" style="color:rgba(212,168,83,.7);margin-bottom:.4rem">Raj Sahu</div>
-              <div style="font-size:.78rem;color:#3a3b44;line-height:1.5">Upload your friend's photo &amp; replace this placeholder</div>
-            </div>
+      <div class="photo-wrap">
+        <div class="photo-glow"></div>
+        <div class="photo-inner" style="box-shadow:0 40px 100px rgba(0,0,0,.7)">
+          <!-- ★ REPLACE with actual photo -->
+          <div class="photo-ph">
+            <svg width="100" height="100" viewBox="0 0 120 120" fill="none"><circle cx="60" cy="40" r="28" fill="rgba(212,168,83,.15)" stroke="rgba(212,168,83,.3)" stroke-width="1.5"/><ellipse cx="60" cy="105" rx="48" ry="30" fill="rgba(212,168,83,.08)" stroke="rgba(212,168,83,.2)" stroke-width="1.5"/><circle cx="60" cy="40" r="20" fill="rgba(212,168,83,.25)"/></svg>
+            <div style="text-align:center;padding:0 2rem"><div class="lbl" style="color:rgba(212,168,83,.7);margin-bottom:.4rem">Raj Sahu</div><div style="font-size:.76rem;color:#3a3b44;line-height:1.5">Replace this with a real portrait photo</div></div>
           </div>
         </div>
-        <div class="exp-badge">
-          <div class="stat-val text-3xl" style="color:#08090c">5+</div>
-          <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(8,9,12,.7);margin-top:.1rem">Years Exp.</div>
-        </div>
+        <div class="exp-b"><div class="stat-val text-3xl" style="color:#08090c">5+</div><div style="font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(8,9,12,.7);margin-top:.1rem">Years Exp.</div></div>
       </div>
     </div>
-
-    <!-- Text right -->
     <div class="rv-r">
-      <div class="label mb-4">About Me</div>
-      <h2 class="font-serif mb-6 leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">
-        The Editor Behind<br><span class="gold-grad">The Stories.</span>
-      </h2>
+      <div class="lbl mb-4">About Me</div>
+      <h2 class="font-serif mb-6 leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">The Editor Behind<br><span class="grad">The Stories.</span></h2>
       <div class="space-y-4" style="color:#6b6d7a;line-height:1.8;font-size:.95rem">
-        <p>
-          Hi, I'm <strong style="color:#eeeef2">Raj Sahu</strong> — a professional video editor with over 5 years of experience crafting cinematic, high-retention content for creators, brands, and businesses worldwide.
-        </p>
-        <p>
-          I've edited everything from 30-second viral reels to 2-hour documentary films. My obsession is pacing, storytelling, and making every frame count. Not just technically clean edits — videos that make people <em style="color:#eeeef2">feel</em> something.
-        </p>
-        <p>
-          What sets me apart? I deliver <strong style="color:var(--gold)">same-day</strong>. Most editors take a week — I turn it around before you go to sleep.
-        </p>
+        <p>Hi, I'm <strong style="color:#eeeef2">Raj Sahu</strong> — a professional video editor with over 5 years of experience crafting cinematic, high-retention content for creators, brands, and businesses worldwide.</p>
+        <p>I've edited everything from 30-second viral reels to 2-hour documentary films. My obsession is pacing, storytelling, and making every frame count.</p>
+        <p>What sets me apart? I deliver <strong style="color:var(--gold)">same-day</strong>. Most editors take a week — I turn it around before you go to sleep.</p>
       </div>
-
-      <!-- Skills chips -->
       <div class="flex flex-wrap gap-2 mt-8">
-        <span class="label px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Premiere Pro</span>
-        <span class="label px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">DaVinci Resolve</span>
-        <span class="label px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">After Effects</span>
-        <span class="label px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Color Grading</span>
-        <span class="label px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Motion Graphics</span>
-        <span class="label px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Sound Design</span>
+        <span class="lbl px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Premiere Pro</span>
+        <span class="lbl px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">DaVinci Resolve</span>
+        <span class="lbl px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">After Effects</span>
+        <span class="lbl px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Color Grading</span>
+        <span class="lbl px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Motion Graphics</span>
+        <span class="lbl px-3 py-1.5 rounded" style="border:1px solid rgba(212,168,83,.2);color:var(--gold);background:rgba(212,168,83,.05)">Sound Design</span>
       </div>
-
       <div class="flex flex-wrap gap-4 mt-10">
-        <a href="#contact" class="btn-primary">Work With Me</a>
-        <a href="https://wa.me/1234567890" target="_blank" class="btn-outline">
+        <a href="#contact" class="btn-g">Work With Me</a>
+        <a id="about-wa" href="https://wa.me/1234567890" target="_blank" class="btn-o">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
           WhatsApp Me
         </a>
@@ -737,867 +573,681 @@
     </div>
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     PORTFOLIO / WORK
-══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     PORTFOLIO  ← Google Sheets
+═══════════════════════════════════════════════════════════ -->
 <section id="work" class="py-28 px-6 md:px-10">
   <div class="max-w-7xl mx-auto">
-
     <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 rv">
-      <div>
-        <div class="label mb-3">Portfolio</div>
-        <h2 class="font-serif leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">
-          Selected <span class="gold-grad">Work</span>
-        </h2>
-      </div>
-      <p style="color:#6b6d7a;max-width:320px;font-size:.9rem;line-height:1.7;margin-top:1rem">
-        Click any project to watch a preview. Each edit is a story — not just a cut.
-      </p>
+      <div><div class="lbl mb-3">Portfolio</div><h2 class="font-serif leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">Selected <span class="grad">Work</span></h2></div>
+      <p style="color:#6b6d7a;max-width:300px;font-size:.88rem;line-height:1.7;margin-top:1rem">Click any project to watch a preview.</p>
     </div>
-
-    <!-- Filter tabs -->
-    <div class="flex flex-wrap gap-2 mb-10 rv" id="filter-bar">
-      <button class="ftab on" data-f="all">All</button>
-      <button class="ftab" data-f="youtube">YouTube</button>
-      <button class="ftab" data-f="reels">Reels</button>
-      <button class="ftab" data-f="brand">Brand</button>
-      <button class="ftab" data-f="podcast">Podcast</button>
-    </div>
-
-    <!-- Grid -->
+    <div class="flex flex-wrap gap-2 mb-10 rv" id="filter-bar"><button class="ftab on" data-f="all">All</button></div>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" id="pgrid">
-
-      <!-- Card 1 -->
-      <div class="pcard rv" data-cat="youtube"
-           onclick="openModal('https://drive.google.com/file/d/PLACEHOLDER_DRIVE_ID_1/preview','Tech Channel — Product Review Edit')">
-        <div class="pcard-thumb">
-          <div class="pcard-thumb-inner" style="background:linear-gradient(135deg,#0f1f3d 0%,#1a3a6e 50%,#0a1628 100%)">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(212,168,83,.25)"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 8l8 4-8 4V8z" fill="rgba(212,168,83,.5)"/></svg>
-          </div>
-          <div class="pcard-overlay">
-            <div class="play-ring">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="pcard-info">
-          <div class="label mb-1" style="color:var(--gold)">YouTube</div>
-          <div style="font-weight:700;font-size:.92rem;color:#eeeef2">Tech Review — 18 Min Documentary</div>
-          <div style="font-size:.75rem;color:#6b6d7a;margin-top:.3rem">Cut · Color · Motion Graphics · SFX</div>
-        </div>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="pcard rv" data-cat="reels" style="transition-delay:.08s"
-           onclick="openModal('https://drive.google.com/file/d/PLACEHOLDER_DRIVE_ID_2/preview','Fashion Reel — 30s Viral Edit')">
-        <div class="pcard-thumb">
-          <div class="pcard-thumb-inner" style="background:linear-gradient(135deg,#2d0a3e 0%,#5c1a7a 50%,#1a0a28 100%)">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(212,168,83,.25)"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="16" r="1.5" fill="rgba(212,168,83,.5)"/></svg>
-          </div>
-          <div class="pcard-overlay">
-            <div class="play-ring">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="pcard-info">
-          <div class="label mb-1" style="color:var(--gold)">Reels / Shorts</div>
-          <div style="font-weight:700;font-size:.92rem;color:#eeeef2">Fashion Brand — 30s Viral Reel</div>
-          <div style="font-size:.75rem;color:#6b6d7a;margin-top:.3rem">Transitions · Music Sync · Captions</div>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="pcard rv" data-cat="brand" style="transition-delay:.16s"
-           onclick="openModal('https://drive.google.com/file/d/PLACEHOLDER_DRIVE_ID_3/preview','Corporate Promo — 2 Min Brand Film')">
-        <div class="pcard-thumb">
-          <div class="pcard-thumb-inner" style="background:linear-gradient(135deg,#1a0a00 0%,#5c2a00 50%,#2e1500 100%)">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(212,168,83,.25)"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="rgba(212,168,83,.5)" stroke-width="1.5" fill="none"/></svg>
-          </div>
-          <div class="pcard-overlay">
-            <div class="play-ring">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="pcard-info">
-          <div class="label mb-1" style="color:var(--gold)">Brand</div>
-          <div style="font-weight:700;font-size:.92rem;color:#eeeef2">Corporate Promo — 2 Min Brand Film</div>
-          <div style="font-size:.75rem;color:#6b6d7a;margin-top:.3rem">Color Grade · Lower Thirds · Voiceover</div>
-        </div>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="pcard rv" data-cat="youtube" style="transition-delay:.04s"
-           onclick="openModal('https://drive.google.com/file/d/PLACEHOLDER_DRIVE_ID_4/preview','Gaming Channel — Highlights Edit')">
-        <div class="pcard-thumb">
-          <div class="pcard-thumb-inner" style="background:linear-gradient(135deg,#001a2e 0%,#003d6b 50%,#00254a 100%)">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(212,168,83,.25)"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2" fill="rgba(212,168,83,.5)"/><path d="M14 10h4M16 8v4" stroke="rgba(212,168,83,.5)" stroke-width="1.5"/></svg>
-          </div>
-          <div class="pcard-overlay">
-            <div class="play-ring">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="pcard-info">
-          <div class="label mb-1" style="color:var(--gold)">YouTube</div>
-          <div style="font-weight:700;font-size:.92rem;color:#eeeef2">Gaming Channel — Highlights Edit</div>
-          <div style="font-size:.75rem;color:#6b6d7a;margin-top:.3rem">Dynamic Pacing · SFX · Thumbnail</div>
-        </div>
-      </div>
-
-      <!-- Card 5 -->
-      <div class="pcard rv" data-cat="podcast" style="transition-delay:.12s"
-           onclick="openModal('https://drive.google.com/file/d/PLACEHOLDER_DRIVE_ID_5/preview','Business Podcast — Full Episode Edit')">
-        <div class="pcard-thumb">
-          <div class="pcard-thumb-inner" style="background:linear-gradient(135deg,#111111 0%,#2a2a2a 50%,#1a1a1a 100%)">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(212,168,83,.25)"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="rgba(212,168,83,.4)"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="rgba(212,168,83,.5)" stroke-width="1.5" fill="none"/></svg>
-          </div>
-          <div class="pcard-overlay">
-            <div class="play-ring">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="pcard-info">
-          <div class="label mb-1" style="color:var(--gold)">Podcast</div>
-          <div style="font-weight:700;font-size:.92rem;color:#eeeef2">Business Podcast — Full Episode</div>
-          <div style="font-size:.75rem;color:#6b6d7a;margin-top:.3rem">Multi-cam · Audio Clean · Clips Pack</div>
-        </div>
-      </div>
-
-      <!-- Card 6 -->
-      <div class="pcard rv" data-cat="reels" style="transition-delay:.2s"
-           onclick="openModal('https://drive.google.com/file/d/PLACEHOLDER_DRIVE_ID_6/preview','Beauty Creator — Viral Reel Series')">
-        <div class="pcard-thumb">
-          <div class="pcard-thumb-inner" style="background:linear-gradient(135deg,#1a0a1e 0%,#3d0f4a 50%,#1e0d28 100%)">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="rgba(212,168,83,.25)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(212,168,83,.3)" stroke="rgba(212,168,83,.5)" stroke-width="1"/></svg>
-          </div>
-          <div class="pcard-overlay">
-            <div class="play-ring">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="pcard-info">
-          <div class="label mb-1" style="color:var(--gold)">Reels</div>
-          <div style="font-weight:700;font-size:.92rem;color:#eeeef2">Beauty Creator — Viral Reel Series</div>
-          <div style="font-size:.75rem;color:#6b6d7a;margin-top:.3rem">VFX · Trending Audio · Text Motion</div>
-        </div>
-      </div>
-
-    </div><!-- /pgrid -->
+      <div class="skel" style="aspect-ratio:16/10"></div>
+      <div class="skel" style="aspect-ratio:16/10"></div>
+      <div class="skel" style="aspect-ratio:16/10"></div>
+    </div>
+    <div id="portfolio-empty" style="display:none;text-align:center;padding:4rem 1rem;color:#6b6d7a">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">📋</div>
+      <div style="font-size:.9rem">No portfolio data yet.</div>
+      <div style="font-size:.78rem;margin-top:.4rem">Click the <strong style="color:var(--gold)">⊞ button</strong> bottom-left → Portfolio tab → enter credentials → Load.</div>
+    </div>
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     SERVICES
-══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     SERVICES  ← Google Sheets
+═══════════════════════════════════════════════════════════ -->
 <section id="services" class="py-28 px-6 md:px-10">
   <div class="max-w-7xl mx-auto">
-
-    <div class="text-center mb-16 rv">
-      <div class="label mb-3">Services</div>
-      <h2 class="font-serif leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">
-        What I Do <span class="gold-grad">Best</span>
-      </h2>
+    <div class="text-center mb-16 rv"><div class="lbl mb-3">Services</div><h2 class="font-serif leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">What I Do <span class="grad">Best</span></h2></div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" id="services-grid">
+      <div class="skel rounded-xl" style="height:220px"></div>
+      <div class="skel rounded-xl" style="height:220px"></div>
+      <div class="skel rounded-xl" style="height:220px"></div>
     </div>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-      <div class="scard p-7 rv">
-        <div class="scard-icon" style="background:rgba(30,60,120,.4);border:1px solid rgba(60,100,200,.2)">📹</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">YouTube Editing</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Long-form videos built for retention — tight pacing, engaging B-roll, clean jump-cuts, animated text, and thumbnail creation.</p>
-        <div class="hr mt-5 mb-4"></div>
-        <div class="flex justify-between items-center">
-          <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
-          <span class="font-serif font-bold text-xl" style="color:var(--gold)">$49</span>
-        </div>
-      </div>
-
-      <div class="scard p-7 rv" style="transition-delay:.08s">
-        <div class="scard-icon" style="background:rgba(100,20,120,.4);border:1px solid rgba(180,40,200,.2)">📱</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Reels &amp; Shorts</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Hook-first vertical videos engineered to stop the scroll — trending transitions, beat-synced cuts, animated captions, and viral pacing.</p>
-        <div class="hr mt-5 mb-4"></div>
-        <div class="flex justify-between items-center">
-          <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
-          <span class="font-serif font-bold text-xl" style="color:var(--gold)">$19</span>
-        </div>
-      </div>
-
-      <div class="scard p-7 rv" style="transition-delay:.16s">
-        <div class="scard-icon" style="background:rgba(20,60,40,.4);border:1px solid rgba(40,140,80,.2)">🎙️</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Podcast Editing</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Multi-cam edits with noise removal, clean audio, lower thirds, intro/outro, and a clip-reel for social media — fully publish-ready.</p>
-        <div class="hr mt-5 mb-4"></div>
-        <div class="flex justify-between items-center">
-          <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
-          <span class="font-serif font-bold text-xl" style="color:var(--gold)">$39</span>
-        </div>
-      </div>
-
-      <div class="scard p-7 rv" style="transition-delay:.04s">
-        <div class="scard-icon" style="background:rgba(80,50,10,.4);border:1px solid rgba(200,130,20,.2)">🎨</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Color Grading</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Cinematic LUT-based color grades that give your footage a premium film look — consistent across scenes, skin-tone perfect.</p>
-        <div class="hr mt-5 mb-4"></div>
-        <div class="flex justify-between items-center">
-          <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
-          <span class="font-serif font-bold text-xl" style="color:var(--gold)">$29</span>
-        </div>
-      </div>
-
-      <div class="scard p-7 rv" style="transition-delay:.12s">
-        <div class="scard-icon" style="background:rgba(20,60,20,.4);border:1px solid rgba(40,160,40,.2)">✨</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Motion Graphics</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Custom animated intros, outros, lower thirds, and overlays that brand your videos — built in After Effects, delivered as templates.</p>
-        <div class="hr mt-5 mb-4"></div>
-        <div class="flex justify-between items-center">
-          <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
-          <span class="font-serif font-bold text-xl" style="color:var(--gold)">$25</span>
-        </div>
-      </div>
-
-      <!-- Rush card — highlighted -->
-      <div class="scard p-7 rv" style="transition-delay:.2s;border-color:rgba(232,87,42,.25);background:linear-gradient(135deg,rgba(232,87,42,.06),#16171d)">
-        <div class="scard-icon" style="background:rgba(232,87,42,.15);border:1px solid rgba(232,87,42,.3)">⚡</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Rush — Same Day <span style="color:var(--flame)">★</span></h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Send footage before noon, get your edited video before midnight. Priority queue, dedicated edit session, no compromise on quality.</p>
-        <div style="height:1px;background:rgba(232,87,42,.15);margin:1.25rem 0"></div>
-        <div class="flex justify-between items-center">
-          <span style="color:#6b6d7a;font-size:.75rem">Rush add-on</span>
-          <span class="font-serif font-bold text-xl" style="color:var(--flame)">+$25</span>
-        </div>
-      </div>
-
+    <div id="services-empty" style="display:none;text-align:center;padding:4rem 1rem;color:#6b6d7a">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">📋</div>
+      <div style="font-size:.9rem">No services data yet. Connect your Services sheet via the ⊞ button.</div>
     </div>
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     WHY CHOOSE ME
-══════════════════════════════════════════════════════ -->
+<!-- WHY (static) -->
 <section class="py-28 px-6 md:px-10">
   <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-
-    <!-- Left -->
     <div class="rv-l">
-      <div class="label mb-4">Why Alex Rivera</div>
-      <h2 class="font-serif leading-tight mb-10" style="font-size:clamp(2rem,3.5vw,3rem)">
-        Not Just Edited.<br><span class="gold-grad">Elevated.</span>
-      </h2>
-
+      <div class="lbl mb-4">Why Raj Sahu</div>
+      <h2 class="font-serif leading-tight mb-10" style="font-size:clamp(2rem,3.5vw,3rem)">Not Just Edited.<br><span class="grad">Elevated.</span></h2>
       <div class="space-y-7">
-        <div class="flex gap-5">
-          <div class="step-num flex-shrink-0" style="border-color:rgba(232,87,42,.4);color:var(--flame);width:48px;height:48px">⚡</div>
-          <div>
-            <div class="font-bold mb-1" style="color:#eeeef2">Same-Day Delivery</div>
-            <div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">Send footage in the morning, get your polished video by evening. No week-long waits, no chasing.</div>
-          </div>
-        </div>
-        <div class="flex gap-5">
-          <div class="step-num flex-shrink-0" style="width:48px;height:48px">🎭</div>
-          <div>
-            <div class="font-bold mb-1" style="color:#eeeef2">Storytelling First</div>
-            <div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">Every cut serves the narrative. I edit for emotion, pacing, and retention — not just to chop clips.</div>
-          </div>
-        </div>
-        <div class="flex gap-5">
-          <div class="step-num flex-shrink-0" style="width:48px;height:48px">🔄</div>
-          <div>
-            <div class="font-bold mb-1" style="color:#eeeef2">Unlimited Revisions</div>
-            <div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">Not happy? I'll fix it — no hidden fees, no arguments. Your satisfaction is the final deliverable.</div>
-          </div>
-        </div>
-        <div class="flex gap-5">
-          <div class="step-num flex-shrink-0" style="width:48px;height:48px">💬</div>
-          <div>
-            <div class="font-bold mb-1" style="color:#eeeef2">Direct Communication</div>
-            <div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">No agencies, no middlemen. You talk directly to me on WhatsApp — fast replies, full transparency.</div>
-          </div>
-        </div>
+        <div class="flex gap-5"><div class="step-n flex-shrink-0" style="border-color:rgba(232,87,42,.4);color:var(--flame);width:48px;height:48px">⚡</div><div><div class="font-bold mb-1" style="color:#eeeef2">Same-Day Delivery</div><div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">Send footage in the morning, get your polished video by evening.</div></div></div>
+        <div class="flex gap-5"><div class="step-n flex-shrink-0" style="width:48px;height:48px">🎭</div><div><div class="font-bold mb-1" style="color:#eeeef2">Storytelling First</div><div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">Every cut serves the narrative. I edit for emotion, pacing, and retention.</div></div></div>
+        <div class="flex gap-5"><div class="step-n flex-shrink-0" style="width:48px;height:48px">🔄</div><div><div class="font-bold mb-1" style="color:#eeeef2">Unlimited Revisions</div><div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">Not happy? I'll fix it — no hidden fees, no arguments.</div></div></div>
+        <div class="flex gap-5"><div class="step-n flex-shrink-0" style="width:48px;height:48px">💬</div><div><div class="font-bold mb-1" style="color:#eeeef2">Direct Communication</div><div style="color:#6b6d7a;font-size:.87rem;line-height:1.7">No agencies. Direct WhatsApp — fast replies, full transparency.</div></div></div>
       </div>
     </div>
-
-    <!-- Right: stats card -->
     <div class="rv-r">
-      <div style="border:1px solid rgba(212,168,83,.12);border-radius:12px;overflow:hidden;background:#0f1014">
-        <div style="padding:1.75rem 2rem;border-bottom:1px solid rgba(255,255,255,.05)">
-          <div class="label mb-1">By the Numbers</div>
-          <div style="color:#6b6d7a;font-size:.85rem">Results that speak louder than promises.</div>
-        </div>
+      <div style="border:1px solid rgba(212,168,83,.12);border-radius:12px;overflow:hidden;background:var(--deep)">
+        <div style="padding:1.75rem 2rem;border-bottom:1px solid rgba(255,255,255,.05)"><div class="lbl mb-1">By the Numbers</div><div style="color:#6b6d7a;font-size:.85rem">Results that speak louder than promises.</div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(255,255,255,.05)">
-          <div style="padding:2rem;border-right:1px solid rgba(255,255,255,.05)">
-            <div class="stat-val text-5xl" style="color:#eeeef2">200<span style="color:var(--gold)">+</span></div>
-            <div style="color:#6b6d7a;font-size:.78rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Videos Done</div>
-          </div>
-          <div style="padding:2rem">
-            <div class="stat-val text-5xl" style="color:#eeeef2">24<span style="color:var(--gold)">H</span></div>
-            <div style="color:#6b6d7a;font-size:.78rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Avg. Turnaround</div>
-          </div>
+          <div style="padding:2rem;border-right:1px solid rgba(255,255,255,.05)"><div class="stat-val text-5xl" style="color:#eeeef2">200<span style="color:var(--gold)">+</span></div><div style="color:#6b6d7a;font-size:.76rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Videos Done</div></div>
+          <div style="padding:2rem"><div class="stat-val text-5xl" style="color:#eeeef2">24<span style="color:var(--gold)">H</span></div><div style="color:#6b6d7a;font-size:.76rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Turnaround</div></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr">
-          <div style="padding:2rem;border-right:1px solid rgba(255,255,255,.05)">
-            <div class="stat-val text-5xl" style="color:#eeeef2">98<span style="color:var(--gold)">%</span></div>
-            <div style="color:#6b6d7a;font-size:.78rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Satisfaction Rate</div>
-          </div>
-          <div style="padding:2rem">
-            <div class="stat-val text-5xl" style="color:#eeeef2">50<span style="color:var(--gold)">+</span></div>
-            <div style="color:#6b6d7a;font-size:.78rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Repeat Clients</div>
-          </div>
+          <div style="padding:2rem;border-right:1px solid rgba(255,255,255,.05)"><div class="stat-val text-5xl" style="color:#eeeef2">98<span style="color:var(--gold)">%</span></div><div style="color:#6b6d7a;font-size:.76rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Satisfaction</div></div>
+          <div style="padding:2rem"><div class="stat-val text-5xl" style="color:#eeeef2">50<span style="color:var(--gold)">+</span></div><div style="color:#6b6d7a;font-size:.76rem;margin-top:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Repeat Clients</div></div>
         </div>
-        <div style="padding:1.25rem 2rem;background:rgba(212,168,83,.04);border-top:1px solid rgba(212,168,83,.1);display:flex;align-items:center;gap:.6rem">
-          <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
-          <span style="font-size:.82rem;color:#eeeef2">Currently taking <strong style="color:var(--gold)">3 new clients</strong> this week</span>
-        </div>
+        <div style="padding:1.25rem 2rem;background:rgba(212,168,83,.04);border-top:1px solid rgba(212,168,83,.1);display:flex;align-items:center;gap:.6rem"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;animation:blink .8s infinite;flex-shrink:0"></span><span style="font-size:.82rem;color:#eeeef2">Currently taking <strong style="color:var(--gold)">3 new clients</strong> this week</span></div>
       </div>
     </div>
-
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     PROCESS
-══════════════════════════════════════════════════════ -->
+<!-- PROCESS (static) -->
 <section id="process" class="py-28 px-6 md:px-10">
   <div class="max-w-5xl mx-auto text-center">
-
-    <div class="label mb-3 rv">How It Works</div>
-    <h2 class="font-serif leading-tight mb-4 rv" style="font-size:clamp(2.2rem,4vw,3.5rem)">
-      3 Steps to Your <span class="gold-grad">Perfect Edit</span>
-    </h2>
-    <p class="rv mb-20" style="color:#6b6d7a;max-width:400px;margin-left:auto;margin-right:auto;font-size:.92rem;line-height:1.7">
-      Simple, fast, stress-free. From raw footage to finished video — the same day.
-    </p>
-
+    <div class="lbl mb-3 rv">How It Works</div>
+    <h2 class="font-serif leading-tight mb-4 rv" style="font-size:clamp(2.2rem,4vw,3.5rem)">3 Steps to Your <span class="grad">Perfect Edit</span></h2>
+    <p class="rv mb-20" style="color:#6b6d7a;max-width:400px;margin-left:auto;margin-right:auto;font-size:.92rem;line-height:1.7">Simple, fast, stress-free. From raw footage to finished video — the same day.</p>
     <div class="grid md:grid-cols-3 gap-8 relative">
-
-      <!-- Connector lines (desktop) -->
-      <div class="hidden md:block absolute" style="top:2.75rem;left:calc(33.33% + 1.5rem);right:calc(33.33% + 1.5rem);height:1px;background:linear-gradient(to right,rgba(212,168,83,.4),rgba(212,168,83,.4))"></div>
-
-      <div class="rv text-left">
-        <div class="step-num mb-5">01</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Send Your Footage</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Upload via Google Drive or WeTransfer. Drop me a WhatsApp with your brief, style references, and deadline.</p>
-      </div>
-
-      <div class="rv text-left" style="transition-delay:.15s">
-        <div class="step-num mb-5">02</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">I Edit &amp; Craft</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">I cut, color grade, add music, graphics, and sound — building a video that matches your vision and exceeds it.</p>
-      </div>
-
-      <div class="rv text-left" style="transition-delay:.3s">
-        <div class="step-num mb-5">03</div>
-        <h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Download &amp; Publish</h3>
-        <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Receive a full-quality download link. Review it, request revisions if needed, and hit publish. Done.</p>
-      </div>
-
+      <div class="hidden md:block absolute" style="top:2.75rem;left:calc(33.33% + 1.5rem);right:calc(33.33% + 1.5rem);height:1px;background:rgba(212,168,83,.3)"></div>
+      <div class="rv text-left"><div class="step-n mb-5">01</div><h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Send Your Footage</h3><p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Upload via Google Drive or WeTransfer. Drop me a WhatsApp with your brief and deadline.</p></div>
+      <div class="rv text-left" style="transition-delay:.15s"><div class="step-n mb-5">02</div><h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">I Edit &amp; Craft</h3><p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">I cut, color grade, add music and graphics — building a video that matches your vision.</p></div>
+      <div class="rv text-left" style="transition-delay:.3s"><div class="step-n mb-5">03</div><h3 class="font-sans font-bold text-lg mb-3" style="color:#eeeef2">Download &amp; Publish</h3><p style="color:#6b6d7a;font-size:.87rem;line-height:1.75">Receive a full-quality link. Review, request revisions if needed, and hit publish.</p></div>
     </div>
-
-    <div class="mt-16 rv">
-      <a href="#contact" class="btn-flame" style="font-size:.85rem">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-        Start Today — Deliver Tonight
-      </a>
-    </div>
-
+    <div class="mt-16 rv"><a href="#contact" class="btn-f"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Start Today — Deliver Tonight</a></div>
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     TESTIMONIALS
-══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     TESTIMONIALS  ← Google Sheets
+═══════════════════════════════════════════════════════════ -->
 <section id="testimonials" class="py-28 px-6 md:px-10">
   <div class="max-w-7xl mx-auto">
-
-    <div class="text-center mb-16 rv">
-      <div class="label mb-3">Client Reviews</div>
-      <h2 class="font-serif leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">
-        What Clients <span class="gold-grad">Say</span>
-      </h2>
+    <div class="text-center mb-16 rv"><div class="lbl mb-3">Client Reviews</div><h2 class="font-serif leading-tight" style="font-size:clamp(2.2rem,4vw,3.5rem)">What Clients <span class="grad">Say</span></h2></div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5" id="tgrid">
+      <div class="skel rounded-xl" style="height:200px"></div>
+      <div class="skel rounded-xl" style="height:200px"></div>
+      <div class="skel rounded-xl" style="height:200px"></div>
     </div>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-      <div class="tcard p-7 rv">
-        <div style="display:flex;gap:.2rem;margin-bottom:1.2rem">
-          <span style="color:var(--gold)">★★★★★</span>
-        </div>
-        <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">
-          "Raj sent my footage at 9am, had the full YouTube edit back by 6pm. Cinematic color, tight pacing — my audience immediately noticed the quality jump."
-        </p>
-        <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
-          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:white;flex-shrink:0">MK</div>
-          <div>
-            <div style="font-weight:700;font-size:.88rem;color:#eeeef2">Marcus K.</div>
-            <div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">Tech YouTuber — 180K subs</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard p-7 rv" style="transition-delay:.08s">
-        <div style="display:flex;gap:.2rem;margin-bottom:1.2rem">
-          <span style="color:var(--gold)">★★★★★</span>
-        </div>
-        <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">
-          "My reels went from 2K to 50K views after switching to Raj. The music sync, transitions — everything feels premium now. Worth every single penny."
-        </p>
-        <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
-          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#f43f5e);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:white;flex-shrink:0">SA</div>
-          <div>
-            <div style="font-weight:700;font-size:.88rem;color:#eeeef2">Sofia A.</div>
-            <div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">Fashion Creator — 85K followers</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard p-7 rv" style="transition-delay:.16s">
-        <div style="display:flex;gap:.2rem;margin-bottom:1.2rem">
-          <span style="color:var(--gold)">★★★★★</span>
-        </div>
-        <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">
-          "Needed a corporate promo with a brutal deadline. Raj delivered 4 hours early — it looked like a $10K agency production. Our client was blown away."
-        </p>
-        <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
-          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:white;flex-shrink:0">JR</div>
-          <div>
-            <div style="font-weight:700;font-size:.88rem;color:#eeeef2">James R.</div>
-            <div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">Marketing Director, RetailCo</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard p-7 rv" style="transition-delay:.04s">
-        <div style="display:flex;gap:.2rem;margin-bottom:1.2rem">
-          <span style="color:var(--gold)">★★★★★</span>
-        </div>
-        <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">
-          "3 podcast episodes a week — Alex handles all of them consistently, same quality every time. The clip reels for social have tripled my audience in 2 months."
-        </p>
-        <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
-          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:white;flex-shrink:0">DN</div>
-          <div>
-            <div style="font-weight:700;font-size:.88rem;color:#eeeef2">David N.</div>
-            <div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">Podcast Host — Business Weekly</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard p-7 rv" style="transition-delay:.12s">
-        <div style="display:flex;gap:.2rem;margin-bottom:1.2rem">
-          <span style="color:var(--gold)">★★★★★</span>
-        </div>
-        <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">
-          "Shocked at the quality for the price. Gaming channel went from 500 to 12K subs in 2 months purely because the edits started competing with the big channels."
-        </p>
-        <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
-          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:white;flex-shrink:0">TL</div>
-          <div>
-            <div style="font-weight:700;font-size:.88rem;color:#eeeef2">Tyler L.</div>
-            <div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">Gaming Creator — 12K subs</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tcard p-7 rv" style="transition-delay:.2s">
-        <div style="display:flex;gap:.2rem;margin-bottom:1.2rem">
-          <span style="color:var(--gold)">★★★★★</span>
-        </div>
-        <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">
-          "I was skeptical about same-day delivery but it's absolutely legit. Real professional work, not rushed at all. WhatsApp communication is smooth. My permanent editor."
-        </p>
-        <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
-          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#e11d48,#be185d);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:white;flex-shrink:0">LM</div>
-          <div>
-            <div style="font-weight:700;font-size:.88rem;color:#eeeef2">Layla M.</div>
-            <div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">Beauty &amp; Lifestyle Creator</div>
-          </div>
-        </div>
-      </div>
-
+    <div id="testi-empty" style="display:none;text-align:center;padding:4rem 1rem;color:#6b6d7a">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">📋</div>
+      <div style="font-size:.9rem">No testimonials data yet. Connect your sheet via the ⊞ button.</div>
     </div>
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     BIG CTA BAND
-══════════════════════════════════════════════════════ -->
+<!-- BIG CTA -->
 <section class="py-28 px-6 md:px-10 relative overflow-hidden">
   <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse 80% 100% at 50% 50%,rgba(212,168,83,.07),transparent)"></div>
   <div class="max-w-3xl mx-auto text-center rv">
-    <div class="label mb-5">Don't Wait</div>
-    <h2 class="font-serif leading-none mb-6" style="font-size:clamp(2.8rem,7vw,6rem)">
-      <span style="color:#eeeef2;display:block">Your footage</span>
-      <span class="gold-grad" style="display:block;font-style:italic">deserves better.</span>
-    </h2>
-    <p style="color:#6b6d7a;font-size:1rem;line-height:1.8;max-width:420px;margin:0 auto 2.5rem">
-      Stop leaving views on the table. Let's turn your raw clips into videos that grow your audience — edited and delivered today.
-    </p>
+    <div class="lbl mb-5">Don't Wait</div>
+    <h2 class="font-serif leading-none mb-6" style="font-size:clamp(2.8rem,7vw,6rem)"><span style="color:#eeeef2;display:block">Your footage</span><span class="grad" style="display:block;font-style:italic">deserves better.</span></h2>
+    <p style="color:#6b6d7a;font-size:1rem;line-height:1.8;max-width:420px;margin:0 auto 2.5rem">Stop leaving views on the table. Let's turn your raw clips into videos that grow your audience — delivered today.</p>
     <div class="flex flex-wrap gap-4 justify-center">
-      <a href="#contact" class="btn-primary" style="font-size:.88rem;padding:1rem 2.2rem">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-        Send Your Footage Now
-      </a>
-      <a href="https://wa.me/1234567890" target="_blank" class="btn-outline" style="font-size:.88rem;padding:1rem 2.2rem;border-color:rgba(37,211,102,.3);color:#4ade80">
+      <a href="#contact" class="btn-g" style="font-size:.88rem;padding:1rem 2.2rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Send Your Footage Now</a>
+      <a id="cta-wa" href="https://wa.me/1234567890" target="_blank" class="btn-o" style="font-size:.88rem;padding:1rem 2.2rem;border-color:rgba(37,211,102,.3);color:#4ade80">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
         Chat on WhatsApp
       </a>
     </div>
   </div>
 </section>
-
 <div class="hr mx-6 md:mx-10"></div>
 
 
-<!-- ══════════════════════════════════════════════════════
-     CONTACT
-══════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     CONTACT  ← links from Google Sheets
+═══════════════════════════════════════════════════════════ -->
 <section id="contact" class="py-28 px-6 md:px-10">
   <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
-
-    <!-- Left info -->
     <div class="rv-l">
-      <div class="label mb-4">Get In Touch</div>
-      <h2 class="font-serif leading-tight mb-6" style="font-size:clamp(2rem,3.5vw,3rem)">
-        Let's Make Your<br><span class="gold-grad">Best Video Yet.</span>
-      </h2>
-      <p style="color:#6b6d7a;line-height:1.8;font-size:.9rem;max-width:380px;margin-bottom:2.5rem">
-        Send your project details or just say hello. I reply within the hour during business hours. Rush project? WhatsApp me directly.
-      </p>
-
-      <!-- Social links -->
+      <div class="lbl mb-4">Get In Touch</div>
+      <h2 class="font-serif leading-tight mb-6" style="font-size:clamp(2rem,3.5vw,3rem)">Let's Make Your<br><span class="grad">Best Video Yet.</span></h2>
+      <p style="color:#6b6d7a;line-height:1.8;font-size:.9rem;max-width:380px;margin-bottom:2.5rem">Send your project details or just say hello. I reply within the hour during business hours.</p>
       <div class="flex flex-col gap-3">
-
-        <a href="https://wa.me/1234567890" target="_blank" class="soc-link wa">
-          <div style="width:42px;height:42px;border-radius:8px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:.82rem;font-weight:700;color:#eeeef2">WhatsApp</div>
-            <div style="font-size:.75rem;color:#6b6d7a;margin-top:.1rem">+1 (234) 567-8900 · Fastest response</div>
-          </div>
+        <a id="contact-wa" href="https://wa.me/1234567890" target="_blank" class="slink wa">
+          <div style="width:42px;height:42px;border-radius:8px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div>
+          <div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#eeeef2">WhatsApp</div><div id="lbl-wa" style="font-size:.75rem;color:#6b6d7a;margin-top:.1rem">+1 (234) 567-8900 · Fastest response</div></div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-
-        <a href="https://instagram.com/alexrivera.edits" target="_blank" class="soc-link ig">
-          <div style="width:42px;height:42px;border-radius:8px;background:rgba(225,48,108,.12);border:1px solid rgba(225,48,108,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e1306c" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#e1306c" stroke="none"/></svg>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:.82rem;font-weight:700;color:#eeeef2">Instagram</div>
-            <div style="font-size:.75rem;color:#6b6d7a;margin-top:.1rem">@alexrivera.edits · Portfolio &amp; reels</div>
-          </div>
+        <a id="contact-ig" href="https://instagram.com/alexrivera.edits" target="_blank" class="slink ig">
+          <div style="width:42px;height:42px;border-radius:8px;background:rgba(225,48,108,.12);border:1px solid rgba(225,48,108,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e1306c" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#e1306c" stroke="none"/></svg></div>
+          <div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#eeeef2">Instagram</div><div id="lbl-ig" style="font-size:.75rem;color:#6b6d7a;margin-top:.1rem">@alexrivera.edits</div></div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e1306c" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-
-        <a href="mailto:hello@alexrivera.studio" class="soc-link em">
-          <div style="width:42px;height:42px;border-radius:8px;background:rgba(212,168,83,.1);border:1px solid rgba(212,168,83,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:.82rem;font-weight:700;color:#eeeef2">Email</div>
-            <div style="font-size:.75rem;color:#6b6d7a;margin-top:.1rem">hello@alexrivera.studio</div>
-          </div>
+        <a id="contact-em" href="mailto:hello@alexrivera.studio" class="slink em">
+          <div style="width:42px;height:42px;border-radius:8px;background:rgba(212,168,83,.1);border:1px solid rgba(212,168,83,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#eeeef2">Email</div><div id="lbl-em" style="font-size:.75rem;color:#6b6d7a;margin-top:.1rem">hello@alexrivera.studio</div></div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-
       </div>
     </div>
-
-    <!-- Right: form -->
     <div class="rv-r">
-      <div style="background:#0f1014;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:2.2rem">
-
+      <div style="background:var(--deep);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:2.2rem">
         <h3 class="font-sans font-bold text-lg mb-6" style="color:#eeeef2">Send a Project Brief</h3>
-
         <div id="form-fields">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-            <div>
-              <label style="display:block;font-size:.72rem;color:#6b6d7a;margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Name</label>
-              <input type="text" id="f-name" placeholder="Alex Johnson" class="inp"/>
-            </div>
-            <div>
-              <label style="display:block;font-size:.72rem;color:#6b6d7a;margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Email</label>
-              <input type="email" id="f-email" placeholder="you@email.com" class="inp"/>
-            </div>
+            <div><label style="display:block;font-size:.7rem;color:#6b6d7a;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Name</label><input type="text" id="f-name" placeholder="Alex Johnson" class="inp"/></div>
+            <div><label style="display:block;font-size:.7rem;color:#6b6d7a;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Email</label><input type="email" id="f-email" placeholder="you@email.com" class="inp"/></div>
           </div>
-
-          <div style="margin-bottom:1rem">
-            <label style="display:block;font-size:.72rem;color:#6b6d7a;margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Service Needed</label>
-            <select id="f-service" class="inp">
-              <option value="">Select a service…</option>
-              <option>YouTube Editing</option>
-              <option>Reels / Shorts</option>
-              <option>Podcast Editing</option>
-              <option>Color Grading</option>
-              <option>Motion Graphics</option>
-              <option>Rush — Same Day ⚡</option>
-            </select>
-          </div>
-
-          <div style="margin-bottom:1rem">
-            <label style="display:block;font-size:.72rem;color:#6b6d7a;margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Footage Link</label>
-            <input type="url" id="f-link" placeholder="https://drive.google.com/…" class="inp"/>
-          </div>
-
-          <div style="margin-bottom:1.2rem">
-            <label style="display:block;font-size:.72rem;color:#6b6d7a;margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Brief / Instructions</label>
-            <textarea id="f-brief" rows="4" placeholder="Tell me your vision, style references, and deadline…" class="inp" style="resize:none"></textarea>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem">
-            <input type="checkbox" id="f-rush" style="width:16px;height:16px;accent-color:var(--flame)"/>
-            <label for="f-rush" style="font-size:.82rem;color:#9a9caa">
-              ⚡ <span style="color:var(--flame);font-weight:700">Rush it</span> — I need this same-day (+$25)
-            </label>
-          </div>
-
-          <button onclick="submitForm()" class="btn-primary" style="width:100%;justify-content:center;font-size:.85rem">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            Send Project Brief
-          </button>
-
-          <p style="text-align:center;color:#3a3b44;font-size:.75rem;margin-top:1rem">
-            Replied within 1 hour · No spam ever
-          </p>
+          <div style="margin-bottom:1rem"><label style="display:block;font-size:.7rem;color:#6b6d7a;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Service Needed</label>
+            <select id="f-service" class="inp"><option value="">Select a service…</option><option>YouTube Editing</option><option>Reels / Shorts</option><option>Podcast Editing</option><option>Color Grading</option><option>Motion Graphics</option><option>Rush — Same Day ⚡</option></select></div>
+          <div style="margin-bottom:1rem"><label style="display:block;font-size:.7rem;color:#6b6d7a;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Footage Link</label><input type="url" id="f-link" placeholder="https://drive.google.com/…" class="inp"/></div>
+          <div style="margin-bottom:1.2rem"><label style="display:block;font-size:.7rem;color:#6b6d7a;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace">Brief</label><textarea id="f-brief" rows="4" placeholder="Vision, style references, deadline…" class="inp" style="resize:none"></textarea></div>
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem"><input type="checkbox" id="f-rush" style="width:16px;height:16px;accent-color:var(--flame)"/><label for="f-rush" style="font-size:.82rem;color:#9a9caa">⚡ <span style="color:var(--flame);font-weight:700">Rush it</span> — same-day (+$25)</label></div>
+          <button onclick="submitForm()" class="btn-g" style="width:100%;justify-content:center;font-size:.85rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>Send Project Brief</button>
+          <p style="text-align:center;color:#3a3b44;font-size:.74rem;margin-top:1rem">Replied within 1 hour · No spam ever</p>
         </div>
-
-        <!-- Success state -->
-        <div id="form-ok" style="text-align:center;padding:3rem 1rem">
+        <div id="form-ok" style="display:none;text-align:center;padding:3rem 1rem">
           <div style="font-size:3rem;margin-bottom:1rem">🎉</div>
           <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#eeeef2;margin-bottom:.6rem">Brief Received!</div>
-          <p style="color:#6b6d7a;font-size:.88rem;line-height:1.7">I'll review your footage and reply within 1 hour with a quote and timeline. Check your WhatsApp or email.</p>
+          <p style="color:#6b6d7a;font-size:.88rem;line-height:1.7">I'll reply within 1 hour with a quote and timeline.</p>
         </div>
-
       </div>
     </div>
-
   </div>
 </section>
 
 
-<!-- ══════════════════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════════════════ -->
-<footer style="border-top:1px solid rgba(255,255,255,.05);padding:2.5rem 2.5rem">
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,.05);padding:2.5rem">
   <div style="max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem">
-    <div style="display:flex;align-items:center;gap:.75rem">
-      <div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg>
-      </div>
-      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">RAJ <span style="color:var(--gold)">SAHU</span></span>
-    </div>
-    <div style="font-size:.75rem;color:#3a3b44;font-family:'JetBrains Mono',monospace">
-      © 2024 Raj Sahu · All Rights Reserved
-    </div>
+    <div style="display:flex;align-items:center;gap:.75rem"><div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg></div><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">ALEX <span style="color:var(--gold)">RIVERA</span></span></div>
+    <div style="font-size:.75rem;color:#3a3b44;font-family:'JetBrains Mono',monospace">© 2024 Raj Sahu · All Rights Reserved</div>
     <div style="display:flex;align-items:center;gap:1rem">
-      <a href="https://wa.me/1234567890" target="_blank" style="color:#3a3b44;transition:color .2s;text-decoration:none" onmouseover="this.style.color='#25D366'" onmouseout="this.style.color='#3a3b44'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-      </a>
-      <a href="https://instagram.com/alexrivera.edits" target="_blank" style="color:#3a3b44;transition:color .2s;text-decoration:none" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='#3a3b44'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-      </a>
-      <a href="mailto:hello@alexrivera.studio" style="color:#3a3b44;transition:color .2s;text-decoration:none" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='#3a3b44'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      </a>
+      <a id="footer-wa" href="https://wa.me/1234567890" target="_blank" style="color:#3a3b44;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#25D366'" onmouseout="this.style.color='#3a3b44'"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>
+      <a id="footer-ig" href="https://instagram.com/alexrivera.edits" target="_blank" style="color:#3a3b44;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#e1306c'" onmouseout="this.style.color='#3a3b44'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+      <a id="footer-em" href="mailto:hello@alexrivera.studio" style="color:#3a3b44;text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='#3a3b44'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
     </div>
   </div>
 </footer>
 
 
-<!-- ══════════════════════════════════════════════════════
-     VIDEO MODAL
-══════════════════════════════════════════════════════ -->
+<!-- VIDEO MODAL -->
 <div id="modal" role="dialog" aria-modal="true">
   <div style="position:absolute;inset:0" onclick="closeModal()"></div>
   <div id="modal-box" style="position:relative;z-index:1">
-    <!-- Close btn -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
-      <div>
-        <div id="modal-label" class="label" style="color:var(--gold)"></div>
-        <div id="modal-title" style="font-weight:700;font-size:.95rem;color:#eeeef2;margin-top:.2rem"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal()" aria-label="Close video">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
+      <div><div id="modal-lbl" class="lbl" style="color:var(--gold)"></div><div id="modal-ttl" style="font-weight:700;font-size:.95rem;color:#eeeef2;margin-top:.2rem"></div></div>
+      <button class="m-close" onclick="closeModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <iframe id="modal-iframe" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
-    <div style="margin-top:.75rem;display:flex;justify-content:flex-end">
-      <a href="#contact" onclick="closeModal()" class="btn-primary" style="font-size:.76rem;padding:.65rem 1.4rem">
-        Edit My Videos →
-      </a>
-    </div>
+    <div style="margin-top:.75rem;display:flex;justify-content:flex-end"><a href="#contact" onclick="closeModal()" class="btn-g" style="font-size:.76rem;padding:.65rem 1.4rem">Edit My Videos →</a></div>
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════════════════
-     FLOATING WHATSAPP
-══════════════════════════════════════════════════════ -->
-<a id="wa-float" href="https://wa.me/1234567890" target="_blank" aria-label="Chat on WhatsApp">
+<!-- WHATSAPP FLOAT -->
+<a id="wa-float" href="https://wa.me/1234567890" target="_blank" aria-label="WhatsApp">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
 </a>
 
 
-<!-- ══════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      JAVASCRIPT
-══════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════ -->
 <script>
-/* ── Custom cursor ─────────────────────────────── */
-const dot  = document.getElementById('dot');
-const ring = document.getElementById('ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  dot.style.left = mx+'px'; dot.style.top = my+'px';
-});
-(function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12;
-  ring.style.left=rx+'px'; ring.style.top=ry+'px';
-  requestAnimationFrame(loop); })();
-document.querySelectorAll('a,button,.pcard').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-hover'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-hover'));
-});
+/* ════════════════════════════════════════════════════════════
+   GOOGLE SHEETS API v4  — CMS ENGINE
+   ────────────────────────────────────────────────────────────
+   Uses the official Sheets API v4  spreadsheets.values.get
+   endpoint. Requires:
+     • API key with Sheets API enabled (Google Cloud Console)
+     • Spreadsheet must be shared "Anyone with the link → Viewer"
+     • One spreadsheet, one tab per section
 
+   API call:
+   GET https://sheets.googleapis.com/v4/spreadsheets/{id}/values/{range}?key={apiKey}
 
-/* ── Nav scroll ────────────────────────────────── */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll',()=>{
-  nav.classList.toggle('scrolled', window.scrollY > 40);
-});
+   Response shape:
+   { values: [ [col1, col2, …], [row1val1, row1val2, …], … ] }
+════════════════════════════════════════════════════════════ */
 
+/* ── localStorage ──────────────────────────────────────── */
+const LS = 'ar_cms_v3';
+function store()       { try{return JSON.parse(localStorage.getItem(LS))||{};}catch{return{};} }
+function save(d)       { localStorage.setItem(LS, JSON.stringify(d)); }
+function getCfg(k)     { return store()[k]||''; }
+function setCfg(k,v)   { const d=store(); d[k]=v; save(d); }
 
-/* ── Ticker ────────────────────────────────────── */
-const items = [
-  {t:'Same-Day Delivery', c:'gold'},
-  {t:'YouTube Editing',   c:'mist'},
-  {t:'Reels & Shorts',    c:'gold'},
-  {t:'Color Grading',     c:'mist'},
-  {t:'Motion Graphics',   c:'gold'},
-  {t:'Podcast Editing',   c:'mist'},
-  {t:'4K Quality',        c:'gold'},
-  {t:'Unlimited Revisions',c:'mist'},
-  {t:'Fast Turnaround',   c:'gold'},
-  {t:'Direct Communication',c:'mist'},
-];
-const ticker = document.getElementById('ticker');
-const makeItems = () => items.map(i=>
-  `<span style="padding:0 2.5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:${i.c==='gold'?'var(--gold)':'#9a9caa'};white-space:nowrap">✦ ${i.t}</span>`
-).join('');
-ticker.innerHTML = makeItems() + makeItems(); // double for loop
-
-
-/* ── Scroll reveal ─────────────────────────────── */
-const rvEls = document.querySelectorAll('.rv,.rv-l,.rv-r');
-const rvObs = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); rvObs.unobserve(e.target); }});
-},{threshold:.12});
-rvEls.forEach(el=>rvObs.observe(el));
-
-
-/* ── Portfolio filter ──────────────────────────── */
-document.getElementById('filter-bar').addEventListener('click', e=>{
-  const btn = e.target.closest('.ftab');
-  if(!btn) return;
-  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  const f = btn.dataset.f;
-  document.querySelectorAll('#pgrid .pcard').forEach(card=>{
-    const show = f==='all' || card.dataset.cat===f;
-    card.style.display = show ? '' : 'none';
-    if(show){ card.classList.remove('on'); setTimeout(()=>card.classList.add('on'),50); }
+/* ── Save all inputs to localStorage ───────────────────── */
+function saveCfg() {
+  ['apikey','sheetid'].forEach(k=>{
+    const el=document.getElementById('cfg-'+k);
+    if(el) setCfg(k, el.value.trim());
   });
-});
+  ['portfolio','services','testimonials','contact'].forEach(s=>{
+    const t=document.getElementById('tab-'+s);
+    const r=document.getElementById('row-'+s);
+    if(t) setCfg('tab_'+s, t.value.trim());
+    if(r) setCfg('row_'+s, r.value.trim());
+  });
+}
 
+/* ── Restore inputs from localStorage ──────────────────── */
+function restoreCfg() {
+  const set = (id,k) => { const el=document.getElementById(id); if(el&&getCfg(k)) el.value=getCfg(k); };
+  set('cfg-apikey','apikey');
+  set('cfg-sheetid','sheetid');
+  ['portfolio','services','testimonials','contact'].forEach(s=>{
+    set('tab-'+s,'tab_'+s);
+    set('row-'+s,'row_'+s);
+  });
+}
 
-/* ── Video Modal ───────────────────────────────── */
+/* ── Status badge helper ────────────────────────────────── */
+function setStatus(id, state, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'sbadge '+state;
+  el.innerHTML = `<span class="sbadge-dot"></span>${msg}`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SHEETS API FETCH
+   Returns array of objects keyed by header row
+══════════════════════════════════════════════════════════ */
+async function sheetsGet(tab, headerRow=1) {
+  const apiKey  = getCfg('apikey')  || document.getElementById('cfg-apikey')?.value.trim();
+  const sheetId = getCfg('sheetid') || document.getElementById('cfg-sheetid')?.value.trim();
+
+  if (!apiKey || !sheetId) throw new Error('Missing API key or Sheet ID');
+
+  // Fetch the entire tab (A:Z covers up to 26 columns; extend if needed)
+  const range   = encodeURIComponent(`${tab}!A:Z`);
+  const url     = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({error:{message:res.statusText}}));
+    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const rows = data.values || [];
+  if (rows.length < 2) return []; // no data rows
+
+  // Row index for headers (1-based in config, 0-based here)
+  const hi   = Math.max(0, parseInt(headerRow||1) - 1);
+  const hdrs = rows[hi].map(h => h.trim().toLowerCase());
+
+  return rows
+    .slice(hi + 1)
+    .map(row => {
+      const obj = {};
+      hdrs.forEach((h, i) => { obj[h] = (row[i] || '').trim(); });
+      return obj;
+    })
+    .filter(obj => Object.values(obj).some(v => v));
+}
+
+/* ══════════════════════════════════════════════════════════
+   DRIVE EMBED URL
+══════════════════════════════════════════════════════════ */
+function driveEmbed(url) {
+  if (!url) return '';
+  if (url.includes('/preview')) return url;
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+  return url;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HTML ESCAPE
+══════════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER: PORTFOLIO
+══════════════════════════════════════════════════════════ */
+const GRADS = [
+  'linear-gradient(135deg,#0f1f3d,#1a3a6e,#0a1628)',
+  'linear-gradient(135deg,#2d0a3e,#5c1a7a,#1a0a28)',
+  'linear-gradient(135deg,#1a0a00,#5c2a00,#2e1500)',
+  'linear-gradient(135deg,#001a2e,#003d6b,#00254a)',
+  'linear-gradient(135deg,#0e1a0e,#1a3d1a,#0a2010)',
+  'linear-gradient(135deg,#1a0a1e,#3d0f4a,#1e0d28)',
+  'linear-gradient(135deg,#111,#2a2a2a,#1a1a1a)',
+  'linear-gradient(135deg,#1a1500,#4d3e00,#2e2600)',
+];
+const EMOJIS = ['📹','📱','🏢','🎮','🎙️','💄','🎬','✨','🎨','🏆'];
+
+function renderPortfolio(rows) {
+  const grid  = document.getElementById('pgrid');
+  const empty = document.getElementById('portfolio-empty');
+  if (!rows.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  // Rebuild filter tabs
+  const cats = [...new Set(rows.map(r=>(r.category||'').toLowerCase()).filter(Boolean))];
+  const bar  = document.getElementById('filter-bar');
+  bar.innerHTML = '<button class="ftab on" data-f="all">All</button>' +
+    cats.map(c=>`<button class="ftab" data-f="${c}">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join('');
+  bindFilters();
+
+  grid.innerHTML = rows.map((r,i)=>{
+    const bg  = r.bgcolor || GRADS[i%GRADS.length];
+    const em  = r.emoji   || EMOJIS[i%EMOJIS.length];
+    const cat = (r.category||'other').toLowerCase();
+    const vid = driveEmbed(r.videourl||'');
+    const tagHtml = (r.tags||'').split('|').map(t=>t.trim()).filter(Boolean)
+      .map(t=>`<span style="font-size:.72rem;color:#6b6d7a;margin-right:.4rem">${esc(t)}</span>`).join('');
+    return `
+    <div class="pc rv" data-cat="${cat}" style="transition-delay:${(i%3)*.08}s"
+         onclick="openModal('${esc(vid)}','${esc(r.category||'')} — ${esc(r.title||'Video')}')">
+      <div class="pc-thumb">
+        <div class="pc-inner" style="background:${bg}">
+          <span style="font-size:3rem;opacity:.28">${em}</span>
+        </div>
+        <div class="pc-ov">
+          <div class="play-r"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><polygon points="6,3 20,12 6,21"/></svg></div>
+        </div>
+      </div>
+      <div class="pc-info">
+        <div class="lbl mb-1" style="color:var(--gold)">${esc(r.category||'')}</div>
+        <div style="font-weight:700;font-size:.92rem;color:#eeeef2;margin-bottom:.3rem">${esc(r.title||'Untitled')}</div>
+        <div>${tagHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#pgrid .rv').forEach(el=>rvObs.observe(el));
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER: SERVICES
+══════════════════════════════════════════════════════════ */
+function renderServices(rows) {
+  const grid  = document.getElementById('services-grid');
+  const empty = document.getElementById('services-empty');
+  if (!rows.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = rows.map((r,i)=>{
+    const hi  = (r.highlight||'').toLowerCase()==='yes';
+    const brd = hi ? 'border:1px solid rgba(232,87,42,.25);background:linear-gradient(135deg,rgba(232,87,42,.06),var(--panel))' : '';
+    return `
+    <div class="sc p-7 rv" style="${brd};transition-delay:${(i%3)*.08}s">
+      <div style="width:52px;height:52px;border-radius:10px;background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.2rem">${r.icon||'🎬'}</div>
+      <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:#eeeef2;margin-bottom:.75rem">${esc(r.name||'')}</h3>
+      <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75;margin-bottom:1.25rem">${esc(r.description||'')}</p>
+      <div style="height:1px;background:linear-gradient(to right,transparent,rgba(212,168,83,.12),transparent);margin-bottom:1rem"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
+        <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.2rem;color:${hi?'var(--flame)':'var(--gold)'}">${esc(r.price||'')}</span>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#services-grid .rv').forEach(el=>rvObs.observe(el));
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER: TESTIMONIALS
+══════════════════════════════════════════════════════════ */
+const AVATARS = [
+  'linear-gradient(135deg,#3b82f6,#8b5cf6)','linear-gradient(135deg,#ec4899,#f43f5e)',
+  'linear-gradient(135deg,#f59e0b,#ef4444)','linear-gradient(135deg,#10b981,#059669)',
+  'linear-gradient(135deg,#6366f1,#3b82f6)','linear-gradient(135deg,#e11d48,#be185d)',
+];
+function renderTestimonials(rows) {
+  const grid  = document.getElementById('tgrid');
+  const empty = document.getElementById('testi-empty');
+  if (!rows.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = rows.map((r,i)=>{
+    const ini = r.initials || (r.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const av  = r.avatarcolor || AVATARS[i%AVATARS.length];
+    return `
+    <div class="tc p-7 rv" style="transition-delay:${(i%3)*.08}s">
+      <div style="color:var(--gold);margin-bottom:1.2rem">★★★★★</div>
+      <p style="color:#9a9caa;font-size:.9rem;line-height:1.8;margin-bottom:1.5rem;font-style:italic">"${esc(r.review||'')}"</p>
+      <div style="display:flex;align-items:center;gap:.85rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,.05)">
+        <div style="width:42px;height:42px;border-radius:50%;background:${av};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;flex-shrink:0">${ini}</div>
+        <div><div style="font-weight:700;font-size:.88rem;color:#eeeef2">${esc(r.name||'')}</div><div style="font-size:.73rem;color:#6b6d7a;margin-top:.1rem">${esc(r.role||'')}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#tgrid .rv').forEach(el=>rvObs.observe(el));
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER: CONTACT LINKS
+══════════════════════════════════════════════════════════ */
+function renderContact(rows) {
+  if (!rows.length) return;
+  let d = {};
+  // Support key/value two-column format OR single header-row format
+  if (rows[0].hasOwnProperty('key') && rows[0].hasOwnProperty('value')) {
+    rows.forEach(r=>{ d[(r.key||'').toLowerCase()] = r.value; });
+  } else {
+    d = rows[0];
+  }
+
+  const wa=d.whatsapp||'', ig=d.instagram||'', em=d.email||'';
+  const waL=d.whatsapplabel||wa, igL=d.instagramlabel||ig, emL=d.emaillabel||em;
+
+  if (wa) {
+    const href = wa.startsWith('http') ? wa : `https://wa.me/${wa.replace(/\D/g,'')}`;
+    ['contact-wa','cta-wa','about-wa','wa-float','footer-wa'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.href=href;
+    });
+    const l=document.getElementById('lbl-wa'); if(l) l.textContent=waL+' · Fastest response';
+  }
+  if (ig) {
+    const href = ig.startsWith('http') ? ig : `https://instagram.com/${ig.replace('@','')}`;
+    ['contact-ig','footer-ig'].forEach(id=>{ const el=document.getElementById(id); if(el) el.href=href; });
+    const l=document.getElementById('lbl-ig'); if(l) l.textContent=igL;
+  }
+  if (em) {
+    const href = em.startsWith('mailto') ? em : `mailto:${em}`;
+    ['contact-em','footer-em'].forEach(id=>{ const el=document.getElementById(id); if(el) el.href=href; });
+    const l=document.getElementById('lbl-em'); if(l) l.textContent=emL;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   APPLY SECTION — saves config, fetches, renders
+══════════════════════════════════════════════════════════ */
+async function applySection(section) {
+  saveCfg(); // persist latest inputs
+  const tabName  = getCfg('tab_'+section) || document.getElementById('tab-'+section)?.value || section;
+  const headerRow= getCfg('row_'+section) || document.getElementById('row-'+section)?.value || '1';
+  const stId     = 'st-'+section;
+
+  setStatus(stId,'loading','Fetching…');
+  setStatus('global-status','loading','Loading…');
+
+  try {
+    const rows = await sheetsGet(tabName, headerRow);
+    if (section==='portfolio')    renderPortfolio(rows);
+    if (section==='services')     renderServices(rows);
+    if (section==='testimonials') renderTestimonials(rows);
+    if (section==='contact')      renderContact(rows);
+    setStatus(stId, 'ok', rows.length ? `${rows.length} row${rows.length!==1?'s':''} loaded ✓` : 'Sheet empty');
+    setStatus('global-status','ok','Connected');
+  } catch(e) {
+    console.error('[CMS]', section, e.message);
+    // Show friendly error
+    const msg = e.message.includes('API key') ? 'Invalid API key' :
+                e.message.includes('403')     ? 'Access denied — check sheet sharing' :
+                e.message.includes('404')     ? 'Sheet not found — check ID' :
+                e.message.includes('400')     ? 'Bad request — check tab name' :
+                e.message;
+    setStatus(stId,'err', msg);
+    setStatus('global-status','err','Error — see section status');
+    if(section==='portfolio')    renderPortfolio([]);
+    if(section==='services')     renderServices([]);
+    if(section==='testimonials') renderTestimonials([]);
+  }
+}
+
+/* ── Load all sections at once ─────────────────────────── */
+async function loadAll() {
+  saveCfg();
+  await Promise.all(['portfolio','services','testimonials','contact'].map(s=>applySection(s)));
+}
+
+/* ══════════════════════════════════════════════════════════
+   CMS DRAWER UI
+══════════════════════════════════════════════════════════ */
+function toggleDrawer() {
+  const d = document.getElementById('cms-drawer');
+  const b = document.getElementById('cms-btn');
+  d.classList.toggle('open');
+  b.classList.toggle('active');
+  // Close if clicking outside
+  if (d.classList.contains('open')) {
+    setTimeout(()=>{
+      document.addEventListener('click', outsideClick, {once:true,capture:true});
+    }, 50);
+  }
+}
+function outsideClick(e) {
+  const d=document.getElementById('cms-drawer');
+  const b=document.getElementById('cms-btn');
+  if (!d.contains(e.target) && !b.contains(e.target)) {
+    d.classList.remove('open');
+    b.classList.remove('active');
+  }
+}
+function switchTab(name, btn) {
+  document.querySelectorAll('.dpane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('dpane-'+name).classList.add('on');
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+/* ══════════════════════════════════════════════════════════
+   PORTFOLIO FILTER
+══════════════════════════════════════════════════════════ */
+function bindFilters() {
+  document.getElementById('filter-bar').onclick = e => {
+    const btn=e.target.closest('.ftab'); if(!btn) return;
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const f=btn.dataset.f;
+    document.querySelectorAll('#pgrid .pc').forEach(card=>{
+      const show=f==='all'||card.dataset.cat===f;
+      card.style.display=show?'':'none';
+      if(show){card.classList.remove('on');setTimeout(()=>card.classList.add('on'),30);}
+    });
+  };
+}
+
+/* ══════════════════════════════════════════════════════════
+   VIDEO MODAL
+══════════════════════════════════════════════════════════ */
 const modal  = document.getElementById('modal');
 const iframe = document.getElementById('modal-iframe');
-
-function openModal(src, title){
-  const parts = title.split('—');
-  document.getElementById('modal-label').textContent  = parts[0]?.trim() || '';
-  document.getElementById('modal-title').textContent  = parts[1]?.trim() || title;
-  iframe.src = src;
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
+function openModal(src,title) {
+  const pts=(title||'').split('—');
+  document.getElementById('modal-lbl').textContent=pts[0]?.trim()||'';
+  document.getElementById('modal-ttl').textContent=pts[1]?.trim()||title;
+  iframe.src=src; modal.classList.add('open'); document.body.style.overflow='hidden';
 }
-function closeModal(){
-  modal.classList.remove('open');
-  iframe.src = '';
-  document.body.style.overflow = '';
+function closeModal() {
+  modal.classList.remove('open'); iframe.src=''; document.body.style.overflow='';
 }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();}});
 
-
-/* ── Mobile menu ───────────────────────────────── */
-function toggleMenu(){
-  const m = document.getElementById('mob-menu');
-  const h = document.getElementById('ham');
-  m.classList.toggle('open');
-  h.classList.toggle('open');
-  document.body.style.overflow = m.classList.contains('open') ? 'hidden' : '';
+/* ══════════════════════════════════════════════════════════
+   MOBILE MENU
+══════════════════════════════════════════════════════════ */
+function toggleMenu() {
+  document.getElementById('mob-menu').classList.toggle('open');
+  document.getElementById('ham').classList.toggle('open');
+  document.body.style.overflow=document.getElementById('mob-menu').classList.contains('open')?'hidden':'';
 }
-function closeMenu(){
+function closeMenu() {
   document.getElementById('mob-menu').classList.remove('open');
   document.getElementById('ham').classList.remove('open');
   document.body.style.overflow='';
 }
 
-
-/* ── Contact form ──────────────────────────────── */
-function submitForm(){
-  const name  = document.getElementById('f-name').value.trim();
-  const email = document.getElementById('f-email').value.trim();
-  const svc   = document.getElementById('f-service').value;
-  if(!name){ alert('Please enter your name.'); return; }
-  if(!email || !email.includes('@')){ alert('Please enter a valid email.'); return; }
-  if(!svc){ alert('Please select a service.'); return; }
-  document.getElementById('form-fields').style.display = 'none';
-  document.getElementById('form-ok').style.display     = 'block';
+/* ══════════════════════════════════════════════════════════
+   CONTACT FORM
+══════════════════════════════════════════════════════════ */
+function submitForm() {
+  const n=document.getElementById('f-name').value.trim();
+  const e=document.getElementById('f-email').value.trim();
+  const s=document.getElementById('f-service').value;
+  if(!n){alert('Please enter your name.');return;}
+  if(!e||!e.includes('@')){alert('Please enter a valid email.');return;}
+  if(!s){alert('Please select a service.');return;}
+  document.getElementById('form-fields').style.display='none';
+  document.getElementById('form-ok').style.display='block';
 }
 
+/* ══════════════════════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════════════════════ */
+const dot=document.getElementById('dot'),ring=document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button,.pc').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
+});
 
-/* ── Stat counter animation ────────────────────── */
-function animateCount(el, target, suffix){
-  let v=0; const step=Math.ceil(target/55);
-  const t=setInterval(()=>{ v=Math.min(v+step,target); el.textContent=v+suffix; if(v>=target)clearInterval(t); },18);
-}
-const statObs = new IntersectionObserver(entries=>{
-  if(entries[0].isIntersecting){
-    document.querySelectorAll('.stat-val').forEach(el=>{
-      const raw=el.textContent, num=parseInt(raw), suf=raw.replace(/\d/g,'');
-      animateCount(el,num,suf);
-    });
-    statObs.disconnect();
+/* ══════════════════════════════════════════════════════════
+   NAV SCROLL
+══════════════════════════════════════════════════════════ */
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>40);});
+
+/* ══════════════════════════════════════════════════════════
+   TICKER
+══════════════════════════════════════════════════════════ */
+const TI=[{t:'Same-Day Delivery',g:1},{t:'YouTube Editing',g:0},{t:'Reels & Shorts',g:1},{t:'Color Grading',g:0},{t:'Motion Graphics',g:1},{t:'Podcast Editing',g:0},{t:'4K Quality',g:1},{t:'Unlimited Revisions',g:0},{t:'Fast Turnaround',g:1},{t:'Direct Communication',g:0}];
+const th=TI.map(i=>`<span style="padding:0 2.5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:${i.g?'var(--gold)':'#9a9caa'};white-space:nowrap">✦ ${i.t}</span>`).join('');
+document.getElementById('ticker').innerHTML=th+th;
+
+/* ══════════════════════════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════════════════════════ */
+const rvObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');rvObs.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.rv,.rv-l,.rv-r').forEach(el=>rvObs.observe(el));
+
+/* ══════════════════════════════════════════════════════════
+   STAT COUNTERS
+══════════════════════════════════════════════════════════ */
+function animCount(el,to,sf){let v=0;const s=Math.ceil(to/55);const t=setInterval(()=>{v=Math.min(v+s,to);el.textContent=v+sf;if(v>=to)clearInterval(t);},18);}
+const sObs=new IntersectionObserver(es=>{if(es[0].isIntersecting){document.querySelectorAll('.stat-val').forEach(el=>{const raw=el.textContent,n=parseInt(raw),sf=raw.replace(/\d/g,'');if(!isNaN(n))animCount(el,n,sf);});sObs.disconnect();}},{threshold:.4});
+const fStat=document.querySelector('.stat-val');
+if(fStat)sObs.observe(fStat.closest('section')||fStat);
+
+/* ══════════════════════════════════════════════════════════
+   INIT — restore saved config and auto-load if keys present
+══════════════════════════════════════════════════════════ */
+(async()=>{
+  restoreCfg();
+  bindFilters();
+  // Auto-load all sections if credentials were previously saved
+  if (getCfg('apikey') && getCfg('sheetid')) {
+    await loadAll();
+  } else {
+    // Show empty states with hint
+    renderPortfolio([]);
+    renderServices([]);
+    renderTestimonials([]);
   }
-},{threshold:.4});
-const firstStat = document.querySelector('.stat-val');
-if(firstStat) statObs.observe(firstStat.closest('section')||firstStat);
+})();
 </script>
-
 </body>
 </html>
