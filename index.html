@@ -242,220 +242,17 @@
 <!-- ═══════════════════════════════════════════════════════════
      CMS BUTTON (bottom-left)
 ═══════════════════════════════════════════════════════════ -->
-<button id="cms-btn" onclick="toggleDrawer()" title="Google Sheets CMS">
-  <!-- Sheets icon -->
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
-    <rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--gold)" stroke-width="1.6"/>
-    <line x1="3" y1="8" x2="21" y2="8" stroke="var(--gold)" stroke-width="1.4"/>
-    <line x1="3" y1="13" x2="21" y2="13" stroke="var(--gold)" stroke-width="1.4"/>
-    <line x1="9" y1="8" x2="9" y2="21" stroke="var(--gold)" stroke-width="1.4"/>
-  </svg>
-</button>
-
 <!-- ═══════════════════════════════════════════════════════════
      CMS DRAWER — slides up from bottom
 ═══════════════════════════════════════════════════════════ -->
-<div id="cms-drawer" role="complementary" aria-label="Google Sheets CMS">
-  <div id="cms-inner">
-
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem">
-      <div style="display:flex;align-items:center;gap:.75rem">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="var(--gold)" stroke-width="1.8"/><line x1="3" y1="8" x2="21" y2="8" stroke="var(--gold)" stroke-width="1.5"/><line x1="3" y1="13" x2="21" y2="13" stroke="var(--gold)" stroke-width="1.5"/><line x1="9" y1="8" x2="9" y2="21" stroke="var(--gold)" stroke-width="1.5"/></svg>
-        <span class="lbl" style="font-size:.66rem">Google Sheets API — Live CMS</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:.75rem">
-        <span id="global-status" class="sbadge idle"><span class="sbadge-dot"></span>Not connected</span>
-        <button onclick="toggleDrawer()" style="background:none;border:none;color:#6b6d7a;font-size:1rem;padding:.2rem .4rem;line-height:1">✕</button>
-      </div>
-    </div>
-
-    <!-- Two-column layout: left = config, right = how-to -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem" class="md:grid-cols-2">
-
-      <!-- LEFT: API config + section tabs -->
-      <div>
-        <!-- API credentials block -->
-        <div style="background:rgba(212,168,83,.04);border:1px solid rgba(212,168,83,.1);border-radius:8px;padding:1rem;margin-bottom:1.1rem">
-          <div class="lbl" style="font-size:.6rem;margin-bottom:.6rem">Step 1 — API Credentials (stored locally, never sent anywhere)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-            <div>
-              <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">API KEY</div>
-              <input id="cfg-apikey" class="api-inp" type="password" placeholder="AIza…" autocomplete="off" oninput="saveCfg()"/>
-              <div style="font-size:.62rem;color:#3a3b44;margin-top:.3rem">Google Cloud Console → Credentials</div>
-            </div>
-            <div>
-              <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SPREADSHEET ID</div>
-              <input id="cfg-sheetid" class="api-inp" type="text" placeholder="1BxiM…" autocomplete="off" oninput="saveCfg()"/>
-              <div style="font-size:.62rem;color:#3a3b44;margin-top:.3rem">From the Sheet URL: /d/<strong style="color:var(--gold)">ID</strong>/edit</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section tabs -->
-        <div style="margin-bottom:.75rem">
-          <div class="lbl" style="font-size:.6rem;margin-bottom:.6rem">Step 2 — Configure Each Section</div>
-          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.85rem">
-            <button class="dtab on" onclick="switchTab('portfolio',this)">📹 Portfolio</button>
-            <button class="dtab" onclick="switchTab('services',this)">⚙ Services</button>
-            <button class="dtab" onclick="switchTab('testimonials',this)">💬 Testimonials</button>
-            <button class="dtab" onclick="switchTab('contact',this)">📞 Contact</button>
-          </div>
-
-          <!-- ── Portfolio pane ── -->
-          <div id="dpane-portfolio" class="dpane on">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
-                <input id="tab-portfolio" class="api-inp" placeholder="Portfolio" value="Portfolio" oninput="saveCfg()"/>
-              </div>
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
-                <input id="row-portfolio" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
-              </div>
-            </div>
-            <div style="margin-bottom:.7rem">
-              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
-              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
-                <span class="chip req">title</span><span class="chip req">category</span><span class="chip req">videourl</span><span class="chip req">tags</span><span class="chip opt">emoji</span><span class="chip opt">bgcolor</span>
-              </div>
-              <div style="font-size:.65rem;color:#6b6d7a;margin-top:.35rem">tags → pipe-separated: <code style="color:var(--gold)">Cut · Color | Motion | SFX</code></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:.75rem">
-              <button class="apply-btn" onclick="applySection('portfolio')">↻ Load Portfolio</button>
-              <span id="st-portfolio" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
-            </div>
-          </div>
-
-          <!-- ── Services pane ── -->
-          <div id="dpane-services" class="dpane">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
-                <input id="tab-services" class="api-inp" placeholder="Services" value="Services" oninput="saveCfg()"/>
-              </div>
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
-                <input id="row-services" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
-              </div>
-            </div>
-            <div style="margin-bottom:.7rem">
-              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
-              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
-                <span class="chip req">name</span><span class="chip req">description</span><span class="chip req">price</span><span class="chip opt">icon</span><span class="chip opt">highlight</span>
-              </div>
-              <div style="font-size:.65rem;color:#6b6d7a;margin-top:.35rem"><code style="color:var(--gold)">highlight</code> column → type <code style="color:#9a9caa">yes</code> to give a card a glow effect</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:.75rem">
-              <button class="apply-btn" onclick="applySection('services')">↻ Load Services</button>
-              <span id="st-services" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
-            </div>
-          </div>
-
-          <!-- ── Testimonials pane ── -->
-          <div id="dpane-testimonials" class="dpane">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
-                <input id="tab-testimonials" class="api-inp" placeholder="Testimonials" value="Testimonials" oninput="saveCfg()"/>
-              </div>
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
-                <input id="row-testimonials" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
-              </div>
-            </div>
-            <div style="margin-bottom:.7rem">
-              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
-              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
-                <span class="chip req">name</span><span class="chip req">role</span><span class="chip req">review</span><span class="chip opt">initials</span><span class="chip opt">avatarcolor</span>
-              </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:.75rem">
-              <button class="apply-btn" onclick="applySection('testimonials')">↻ Load Testimonials</button>
-              <span id="st-testimonials" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
-            </div>
-          </div>
-
-          <!-- ── Contact pane ── -->
-          <div id="dpane-contact" class="dpane">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">SHEET TAB NAME</div>
-                <input id="tab-contact" class="api-inp" placeholder="Contact" value="Contact" oninput="saveCfg()"/>
-              </div>
-              <div>
-                <div style="font-size:.68rem;color:#9a9caa;margin-bottom:.25rem;font-family:'JetBrains Mono',monospace">HEADER ROW</div>
-                <input id="row-contact" class="api-inp" placeholder="1" value="1" oninput="saveCfg()"/>
-              </div>
-            </div>
-            <div style="margin-bottom:.7rem">
-              <div style="font-size:.65rem;color:#6b6d7a;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace">REQUIRED COLUMNS</div>
-              <div style="display:flex;flex-wrap:wrap;gap:.3rem">
-                <span class="chip req">whatsapp</span><span class="chip req">instagram</span><span class="chip req">email</span><span class="chip opt">whatsapplabel</span><span class="chip opt">instagramlabel</span><span class="chip opt">emaillabel</span>
-              </div>
-              <div style="font-size:.65rem;color:#6b6d7a;margin-top:.35rem">Single data row. Put number/handle/address in the required fields.</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:.75rem">
-              <button class="apply-btn" onclick="applySection('contact')">↻ Load Contact</button>
-              <span id="st-contact" class="sbadge idle"><span class="sbadge-dot"></span>Idle</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Load all button -->
-        <button class="apply-btn" style="margin-top:.5rem;padding:.65rem 1.6rem;font-size:.76rem" onclick="loadAll()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-          Load All Sections
-        </button>
-      </div>
-
-      <!-- RIGHT: How-to guide -->
-      <div>
-        <div class="lbl" style="font-size:.6rem;margin-bottom:.85rem">How to set up — 5 steps</div>
-        <div style="display:flex;flex-direction:column;gap:.85rem;margin-bottom:1.25rem">
-          <div class="how-step">
-            <div class="how-num">1</div>
-            <div><strong>Create a Google Sheet</strong> with tabs named exactly as configured (default: Portfolio, Services, Testimonials, Contact). Add column headers in row 1.</div>
-          </div>
-          <div class="how-step">
-            <div class="how-num">2</div>
-            <div><strong>Enable Sheets API</strong> — go to Google Cloud Console → APIs &amp; Services → Enable <em>Google Sheets API</em>.</div>
-          </div>
-          <div class="how-step">
-            <div class="how-num">3</div>
-            <div><strong>Create an API Key</strong> — Credentials → Create Credentials → API Key. Restrict it to "Google Sheets API" and your site domain for security.</div>
-          </div>
-          <div class="how-step">
-            <div class="how-num">4</div>
-            <div><strong>Share your Sheet</strong> — click Share → Anyone with the link → <em>Viewer</em>. The API key reads public sheets only.</div>
-          </div>
-          <div class="how-step">
-            <div class="how-num">5</div>
-            <div><strong>Paste your API Key + Sheet ID</strong> above, set the tab names, click <em>Load All Sections</em>. Done — your site updates live from the sheet.</div>
-          </div>
-        </div>
-
-        <!-- Quick sheet template reference -->
-        <div style="background:rgba(212,168,83,.04);border:1px solid rgba(212,168,83,.1);border-radius:8px;padding:.9rem">
-          <div class="lbl" style="font-size:.6rem;margin-bottom:.6rem">Sheet ID from URL</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#9a9caa;line-height:1.9;word-break:break-all">
-            https://docs.google.com/spreadsheets/d/<span style="color:var(--gold);background:rgba(212,168,83,.1);padding:.05rem .3rem;border-radius:3px">1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</span>/edit
-          </div>
-          <div style="font-size:.65rem;color:#6b6d7a;margin-top:.4rem">The highlighted portion between <code style="color:#9a9caa">/d/</code> and <code style="color:#9a9caa">/edit</code> is your Sheet ID.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
+<!-- CMS drawer removed -->
 <!-- ═══════════════════════════════════════════════════════════
      NAV
 ═══════════════════════════════════════════════════════════ -->
 <nav id="nav" class="flex items-center justify-between h-20">
   <a href="#home" style="text-decoration:none;display:flex;align-items:center;gap:.75rem;z-index:10">
     <div style="width:32px;height:32px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg></div>
-    <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">ALEX <span style="color:var(--gold)">RIVERA</span></span>
+    <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">RAJ <span style="color:var(--gold)">SAHU</span></span>
   </a>
   <div class="hidden md:flex items-center gap-8">
     <a href="#about"        class="nl">About</a>
@@ -767,7 +564,7 @@
 <!-- FOOTER -->
 <footer style="border-top:1px solid rgba(255,255,255,.05);padding:2.5rem">
   <div style="max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem">
-    <div style="display:flex;align-items:center;gap:.75rem"><div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg></div><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">ALEX <span style="color:var(--gold)">RIVERA</span></span></div>
+    <div style="display:flex;align-items:center;gap:.75rem"><div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--flame));display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="#08090c"><polygon points="5,3 19,12 5,21"/></svg></div><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:#eeeef2">RAJ <span style="color:var(--gold)">SAHU</span></span></div>
     <div style="font-size:.75rem;color:#3a3b44;font-family:'JetBrains Mono',monospace">© 2024 Raj Sahu · All Rights Reserved</div>
     <div style="display:flex;align-items:center;gap:1rem">
       <a id="footer-wa" href="https://wa.me/1234567890" target="_blank" style="color:#3a3b44;text-decoration:none;transition:color .2s" onmouseover="this.style.color='#25D366'" onmouseout="this.style.color='#3a3b44'"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>
@@ -861,9 +658,12 @@ function setStatus(id, state, msg) {
    SHEETS API FETCH
    Returns array of objects keyed by header row
 ══════════════════════════════════════════════════════════ */
+const API_KEY="AIzaSyCEDF0WKJpkUAc3LcaCpDTq85gTi-0IqQo";
+const SHEET_ID="1_qQ1FajGxyqbOYCgN_dVNA6VfLAnSOTGBFUWn5dOGKw";
+
 async function sheetsGet(tab, headerRow=1) {
-  const apiKey  = getCfg('apikey')  || document.getElementById('cfg-apikey')?.value.trim();
-  const sheetId = getCfg('sheetid') || document.getElementById('cfg-sheetid')?.value.trim();
+  const apiKey = API_KEY;
+  const sheetId = SHEET_ID;
 
   if (!apiKey || !sheetId) throw new Error('Missing API key or Sheet ID');
 
