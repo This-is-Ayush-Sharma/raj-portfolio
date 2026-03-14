@@ -1036,17 +1036,14 @@ if(fStat)sObs.observe(fStat.closest('section')||fStat);
    INIT — restore saved config and auto-load if keys present
 ══════════════════════════════════════════════════════════ */
 (async()=>{
-  restoreCfg();
+
   bindFilters();
-  // Auto-load all sections if credentials were previously saved
-  if (getCfg('apikey') && getCfg('sheetid')) {
-    await loadAll();
-  } else {
-    // Show empty states with hint
-    renderPortfolio([]);
-    renderServices([]);
-    renderTestimonials([]);
-  }
+
+  await applySection("portfolio");
+  await applySection("services");
+  await applySection("testimonials");
+  await applySection("contact");
+
 })();
 </script>
 </body>
