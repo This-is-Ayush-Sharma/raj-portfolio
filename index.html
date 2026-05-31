@@ -771,10 +771,10 @@ function renderServices(rows) {
       <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:#eeeef2;margin-bottom:.75rem">${esc(r.name||'')}</h3>
       <p style="color:#6b6d7a;font-size:.87rem;line-height:1.75;margin-bottom:1.25rem">${esc(r.description||'')}</p>
       <div style="height:1px;background:linear-gradient(to right,transparent,rgba(212,168,83,.12),transparent);margin-bottom:1rem"></div>
-      // <div style="display:flex;justify-content:space-between;align-items:center">
-      //   <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
-      //   <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.2rem;color:${hi?'var(--flame)':'var(--gold)'}">${esc(price)}</span>
-      // </div>
+      <!-- <div style="display:flex;justify-content:space-between;align-items:center">
+         <span style="color:#6b6d7a;font-size:.75rem">Starting from</span>
+         <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.2rem;color:${hi?'var(--flame)':'var(--gold)'}">${esc(price)}</span>
+       </div> -->
     </div>`;
   }).join('');
   document.querySelectorAll('#services-grid .rv').forEach(el=>rvObs.observe(el));
